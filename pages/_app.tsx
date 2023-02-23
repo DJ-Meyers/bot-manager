@@ -3,6 +3,7 @@ import Head from "next/head";
 import { MantineProvider } from "@mantine/core";
 import { SessionProvider } from "next-auth/react";
 import { Session } from "next-auth";
+import { Page } from "../components/layout/Page";
 
 export default function App({
   Component,
@@ -28,8 +29,10 @@ export default function App({
             /** Put your mantine theme override here */
             colorScheme: "dark",
           }}
-          >
-          <Component {...pageProps} />
+        >
+          <Page>
+            <Component {...pageProps} />
+          </Page>
         </MantineProvider>
       </SessionProvider>
     </>

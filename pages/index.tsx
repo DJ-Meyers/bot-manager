@@ -12,13 +12,10 @@ export default function IndexPage() {
         session?.user ? (
           <>
             Welcome {session.user?.name}
-            <Link href="#">
-              <Button onClick={(e) => { e.preventDefault(); signOut(); }} size="xl">Sign out</Button>
-            </Link >
           </>
         ) : (
           <Link href="#">
-            <Button onClick={(e) => { e.preventDefault(); signIn("reddit", undefined, { 'state': 'some_string' }); }} size="xl">Sign in with Reddit</Button>
+            <Button  size="xl">Sign in with Reddit</Button>
           </Link >
         )
       }
