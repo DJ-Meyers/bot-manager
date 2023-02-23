@@ -10,13 +10,11 @@ export default function IndexPage() {
         <p>Loading User Session...</p>
       ) :
         session?.user ? (
-          <>
+          <p>
             Welcome {session.user?.name}
-          </>
+          </p>
         ) : (
-          <Link href="#">
-            <Button  size="xl">Sign in with Reddit</Button>
-          </Link >
+          <p>Sign in to get started</p>
         )
       }
     </Group>
