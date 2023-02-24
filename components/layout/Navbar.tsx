@@ -1,4 +1,4 @@
-import { ActionIcon, Anchor, Button, Container, MantineTheme, ThemeIcon, useMantineTheme } from "@mantine/core";
+import { ActionIcon, Anchor, Button, Container, Flex, MantineTheme, ThemeIcon, useMantineTheme } from "@mantine/core";
 import { signIn, signOut, useSession } from "next-auth/react"
 import { IconHome, IconLogout, IconBrandReddit } from "@tabler/icons-react";
 import styled from "@emotion/styled";
@@ -15,19 +15,19 @@ export const Navbar = () => {
     return (
         <StyledNav theme={theme}>
             <Container>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }} >
-                    <div style={{ display: "flex", gap: 8 }}>
+                <Flex justify="space-between" align="center">
+                    <Flex gap="lg" align="flex-end">
                         <Anchor href="/">
                             <ActionIcon variant="transparent">
                                 <IconHome size={20} />
                             </ActionIcon>
                         </Anchor>
-                        {session?.user &&
-                            <Anchor href="/" underline={false} variant="text">
-                                My Bots
+                        {session?.user?.name &&
+                            <Anchor href={`/user/${session.user.name}`} underline={false} variant="text">
+                                Manage
                             </Anchor>
                         }
-                    </div>
+                    </Flex>
                     {status !== "loading" &&
                         session?.user ? (
                             <Button
@@ -50,7 +50,7 @@ export const Navbar = () => {
                         )
                         
                     }
-                </div>
+                </Flex>
             </Container>
         </StyledNav>
     )
