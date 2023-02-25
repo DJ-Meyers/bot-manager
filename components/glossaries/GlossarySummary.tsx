@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Group, List, MultiSelect, Table, TextInput, Title } from "@mantine/core"
+import { Box, Button, Divider, Flex, Group, List, MultiSelect, Table, TextInput, Title } from "@mantine/core"
 import { useForm } from "@mantine/form";
 import { IconPencil } from "@tabler/icons-react";
 import { Session } from "next-auth";
@@ -50,6 +50,7 @@ const GlossarySummary = ({ glossary, session }: GlossarySummaryProps) => {
                 defaultValue={glossary.subreddits}
                 data={glossary.subreddits}
             />
+            <Divider size="xs" my={16} />
             <TermsTable glossaryId={glossary._id!.toString()} terms={glossary.terms} />
         </Box>
     )

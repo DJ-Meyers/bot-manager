@@ -32,7 +32,7 @@ const TermsTable = ({ glossaryId, terms }: { glossaryId: string, terms: ITerm[] 
                         leftIcon={<IconPencil />}
                         component="a"
                         href={`/glossary/${glossaryId}/terms`}
-                    >Edit</Button>
+                    >Edit Terms</Button>
                 </Group>
             </Flex> 
             <Table mt={16}>

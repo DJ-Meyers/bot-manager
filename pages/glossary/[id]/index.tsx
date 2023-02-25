@@ -1,4 +1,4 @@
-import { Loader, MultiSelect, Table, TextInput, Title } from "@mantine/core";
+import { Button, Divider, Group, Loader, MultiSelect, TextInput, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -56,10 +56,14 @@ const GlossaryPage = () => {
 
     if (!glossary) return <Title order={2}>Glossary not found</Title>
 
+
+    const updateGlossary = () => {
+
+    }
+
     return (
         <>
             <Title order={2}>Modify {glossary.name}</Title>
-            <Title order={3} mt={16}>Glossary Metadata</Title>
             <form onSubmit={form.onSubmit((values) => console.log(values))} style={{ marginTop: 16 }}>
                 <TextInput
                     withAsterisk
@@ -95,7 +99,13 @@ const GlossaryPage = () => {
                     }}
                     {...form.getInputProps("subreddits")}
                 />
+                <Group position="right" my={16}>
+                    <Button variant="gradient" type="submit">
+                        Save Changes
+                    </Button>
+                </Group>
             </form>
+            <Divider size="xs" />
             <TermsTable glossaryId={glossary._id!.toString()} terms={glossary.terms} />
         </>
     )
