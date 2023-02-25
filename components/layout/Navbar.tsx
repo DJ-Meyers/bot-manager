@@ -5,6 +5,7 @@ import styled from "@emotion/styled";
 
 const StyledNav = styled.nav`
     padding: 8px 0;
+    margin-bottom: 16px;
     background-color: ${({ theme }: { theme: MantineTheme }) => theme.colorScheme === "dark" ? theme.colors.dark[8] : theme.colors.gray[1]}
 `
 

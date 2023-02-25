@@ -1,5 +1,6 @@
-import { Loader, Text } from "@mantine/core";
+import { Loader, Text, Title } from "@mantine/core";
 import { useSession } from "next-auth/react";
+import { redirect } from "next/dist/server/api-utils";
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react";
 import GlossaryManager from "../../../components/glossaries/GlossaryManager";
@@ -10,13 +11,10 @@ const UserPage = () => {
     const { username } = router.query;
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [glossaries, setGlossaries] = useState<IGlossary[]>([]);
-    const { data: session, status } = useSession();
-
-    if (status !== "loading" && session?.user?.name !== username) {
-        console.log("invalid:", session?.user?.name, username);
-    }
+    const { data: session, status } = useSession({ required: true });
 
     useEffect(() => {
+        if (status === "authenticated" && session?.user?.name !== username) return;
         setIsLoading(true);
         fetch(`/api/user/${username}/glossaries`).then((res) =>
             res.json()
@@ -24,7 +22,12 @@ const UserPage = () => {
             setIsLoading(false);
             setGlossaries(data);
         });
-    }, [,username]);
+    }, [username,session?.user?.name,status]);
+    
+        
+    if (status === "authenticated" && session?.user?.name !== username) {
+        return (<><Title>Unauthorized</Title></>)
+    }
 
     return (
         <>
@@ -40,5 +43,7 @@ const UserPage = () => {
         </>
     );
 }
+
+UserPage.authenticationEnabled = true;
 
 export default UserPage;

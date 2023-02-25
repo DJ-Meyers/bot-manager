@@ -4,7 +4,7 @@ import { Session } from "next-auth";
 import { useEffect, useState } from "react"
 import { IGlossary } from "../../data/Glossary"
 import { ITerm } from "../../data/Term";
-import TermManager from "./TermManager";
+import TermManager from "./terms/TermManager";
 
 type GlossaryManagerProps = {
     glossaries: IGlossary[],
@@ -46,7 +46,7 @@ const GlossaryManager = ({ glossaries, session }: GlossaryManagerProps) => {
     }, [selectedGlossary,]);
     
     return (
-        <Flex mt={16}>
+        <Flex>
             <Box style={{ flexBasis: "50%", flexGrow: 1 }}>
                 <Title order={2}>{session?.user?.name}&apos;s Glossaries</Title>
                 <List>

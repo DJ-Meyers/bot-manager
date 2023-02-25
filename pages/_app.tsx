@@ -1,16 +1,30 @@
 import { AppProps } from "next/app";
 import Head from "next/head";
-import { MantineProvider } from "@mantine/core";
-import { SessionProvider } from "next-auth/react";
+import { Loader, MantineProvider } from "@mantine/core";
+import { SessionProvider, useSession } from "next-auth/react";
 import { Session } from "next-auth";
 import { Page } from "../components/layout/Page";
 import { ModalsProvider } from "@mantine/modals";
 import { NotificationsProvider } from "@mantine/notifications";
+import { ReactElement } from "react";
+import { NextComponentType, NextPageContext } from "next";
+import { AuthEnabledComponentConfig } from "../utils/auth";
+
+interface children {
+  children: ReactElement
+}
+
+type NextComponentWithAuth = NextComponentType<NextPageContext, any, {}> &
+  Partial<AuthEnabledComponentConfig>;
+
+type AppAuthProps = AppProps & {
+  Component: NextComponentWithAuth;
+};
 
 export default function App({
   Component,
   pageProps: { session, ...pageProps },
-}: AppProps<{ session: Session}>) {
+}: AppAuthProps) {
 
   return (
     <>
@@ -34,13 +48,32 @@ export default function App({
         >
           <ModalsProvider>
             <NotificationsProvider position="top-right">
-              <Page>
-                <Component {...pageProps} />
-              </Page>
+              {Component.authenticationEnabled ? (
+                <Auth>
+                  <Page>
+                    <Component {...pageProps} />
+                  </Page>
+                </Auth>
+              ) : (
+                <Page>
+                  <Component {...pageProps} />
+                </Page>    
+              )}
+              
             </NotificationsProvider>
           </ModalsProvider>
         </MantineProvider>
       </SessionProvider>
     </>
   );
+}
+
+const Auth = ({ children }: children) => {
+  const { status } = useSession({ required: true });
+
+  if (status === "loading") {
+    return <Loader />
+  }
+
+  return children;
 }

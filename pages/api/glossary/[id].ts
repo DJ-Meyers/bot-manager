@@ -2,11 +2,12 @@ import { ObjectId } from "bson";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 import { closeConnection, getGlossaryCollection } from "../../../data/database";
+import { IGlossary } from "../../../data/Glossary";
 import { authOptions } from "../auth/[...nextauth]";
 
 type GlossaryApiResponse = {
     message: string
-} | JSON
+} | JSON | IGlossary
 
 const handler = async (req: NextApiRequest, res: NextApiResponse<GlossaryApiResponse>) => {
     const session = await getServerSession(req, res, authOptions);
@@ -15,10 +16,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<GlossaryApiResp
         res.status(401).json({ message: "You must be logged in." });
         return;
     }
-    if (req.method !== "PATCH") {
-        res.status(405).json({ message: "Invalid HTTP Method" });
-        return;
-    } else {
+    if (req.method === "PATCH") {
         const { collection, client } = await getGlossaryCollection();
         const newTerms = JSON.parse(req.body);
         const mongoResult = await collection.updateOne({
@@ -29,6 +27,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<GlossaryApiResp
             }
         });
 
+        client.close();
         if (mongoResult.matchedCount === 1 && mongoResult.matchedCount === mongoResult.modifiedCount) {
             res.status(200).json(newTerms);
             return;
@@ -39,7 +38,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<GlossaryApiResp
             res.status(404).json({ message: `Could not find glossary owned by ${session.user.name} with name ${name}.` });
             return;
         }
-        
+    } else if (req.method === "GET") {
+        const { collection, client } = await getGlossaryCollection();
+        const glossary = (await collection.findOne({ _id: new ObjectId(id as string), owners: session.user.name })) as IGlossary;
+        client.close();
+        if (!glossary) {
+            res.status(404).json({ message: `Could not find glossary with id: ${id}` });
+            return;
+        }
+        res.status(200).json(glossary);
+    } else {
+        res.status(405).json({ message: "Invalid HTTP Method" });
+        return;
     }
 }
 

@@ -1,11 +1,11 @@
 import { Button, Flex, Group, Table, Title } from "@mantine/core"
 import { openModal, closeAllModals } from "@mantine/modals";
 import { SetStateAction, useEffect, useRef, useState } from "react";
-import { ITerm } from "../../data/Term"
+import { ITerm } from "../../../data/Term"
 import FieldModal from "./FieldModal";
 import TermForm from "./TermForm";
-import { IconDeviceFloppy, IconPlus } from "@tabler/icons-react";
-import { IGlossary } from "../../data/Glossary";
+import { IconDeviceFloppy, IconPencil, IconPlus } from "@tabler/icons-react";
+import { IGlossary } from "../../../data/Glossary";
 import { showNotification } from "@mantine/notifications";
 
 export interface TermManagerProps {
@@ -70,10 +70,10 @@ const TermManager = ({ terms, setTerms, glossary }: TermManagerProps) => {
     return (
         <>
             <TermForm isOpen={isOpen} setIsOpen={setIsOpen} fields={fields} modalArgs={modalArgs} setTerms={setTerms} />
-            <Flex mt={16} justify="space-between" align="center" >
+            <Flex justify="space-between" align="center" >
                 <Title order={3}>Terms</Title>
                 <Group spacing={16}>
-                    <Button
+                    {/* <Button
                         variant="default"
                         size="xs"
                         leftIcon={<IconDeviceFloppy />}
@@ -90,7 +90,14 @@ const TermManager = ({ terms, setTerms, glossary }: TermManagerProps) => {
                         size="xs"
                         leftIcon={<IconPlus />}
                         onClick={() => openModal(modalArgs)}
-                    >Field</Button>
+                    >Field</Button> */}
+                    <Button
+                        variant="default"
+                        size="xs"
+                        leftIcon={<IconPencil />}
+                        component="a"
+                        href={`/glossary/${glossary._id}/terms`}
+                    >Edit</Button>
                 </Group>
             </Flex>  
             <Table mt={16}>
