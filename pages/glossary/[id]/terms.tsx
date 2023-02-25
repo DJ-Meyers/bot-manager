@@ -35,11 +35,11 @@ const TermsPage = () => {
 
 
     useEffect(() => {
+        if (!id) return;
         setIsLoading(true);
         fetch(`/api/glossary/${id}`).then((res) =>
             res.json()
         ).then((data) => {
-            console.log(data);
             setIsLoading(false);
             setGlossary(data);
             setTerms(data.terms);
@@ -121,7 +121,7 @@ const TermsPage = () => {
                     </tr>     
                 </thead>
                 <tbody>
-                    {terms.map((term, i) => 
+                    {terms && terms.map((term, i) => 
                         <tr key={i}>
                             {fields.map((field) => <td key={`${i}-${field}`}>{
                                 term[field] || ""

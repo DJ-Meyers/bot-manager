@@ -70,7 +70,7 @@ const TermManager = ({ terms, setTerms, glossary }: TermManagerProps) => {
     return (
         <>
             <TermForm isOpen={isOpen} setIsOpen={setIsOpen} fields={fields} modalArgs={modalArgs} setTerms={setTerms} />
-            <Flex justify="space-between" align="center" >
+            <Flex justify="space-between" align="center" mt={16}>
                 <Title order={3}>Terms</Title>
                 <Group spacing={16}>
                     {/* <Button

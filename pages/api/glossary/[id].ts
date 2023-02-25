@@ -35,7 +35,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<GlossaryApiResp
             res.status(409).json({ message: `Request rejected because Terms haven't changed.` });
             return;
         } else {
-            res.status(404).json({ message: `Could not find glossary owned by ${session.user.name} with name ${name}.` });
+            res.status(404).json({ message: `Could not find glossary owned by ${session.user.name} with id: ${id}.` });
             return;
         }
     } else if (req.method === "GET") {
