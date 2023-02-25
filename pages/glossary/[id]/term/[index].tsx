@@ -1,3 +1,4 @@
+import { Loader } from "@mantine/core";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { IGlossary } from "../../../../data/Glossary";
@@ -22,6 +23,8 @@ const TermPage = () => {
         });
     }, [id]);
 
+    if (isLoading) return <Loader />
+    
     return (
         <>Term: {JSON.stringify(term)}</>
     )
