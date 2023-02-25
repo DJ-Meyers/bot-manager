@@ -1,5 +1,5 @@
-import { ActionIcon, Anchor, Button, Flex, Group, Loader, Table, Title } from "@mantine/core"
-import { closeAllModals, openModal } from "@mantine/modals";
+import { ActionIcon, Anchor, Button, Group, Loader, Table, Title, Text } from "@mantine/core"
+import { closeAllModals, openConfirmModal, openModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import { IconDeviceFloppy, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useSession } from "next-auth/react";
@@ -33,10 +33,7 @@ const TermsPage = () => {
         setFields(tempFields);
     }, [terms,]);
 
-
-    useEffect(() => {
-        if (!id) return;
-        setIsLoading(true);
+    const getGlossary = async (id: string) => {
         fetch(`/api/glossary/${id}`).then((res) =>
             res.json()
         ).then((data) => {
@@ -44,6 +41,12 @@ const TermsPage = () => {
             setGlossary(data);
             setTerms(data.terms);
         });
+    }
+
+    useEffect(() => {
+        if (!id) return;
+        setIsLoading(true);
+        getGlossary(id as string);
     }, [id]);
 
 
@@ -118,8 +121,32 @@ const TermsPage = () => {
         });
     }
 
-    const deleteTerm = (term: ITerm) => {
-        console.log("deleting", term);
+    const deleteTerm = (term: ITerm, index: number) => {
+        console.log("Attemtping delete", term, index);
+        fetch(`/api/glossary/${id}/terms/${index}`, {
+            method: "DELETE",
+            body: JSON.stringify(term)
+        }).then(async (res) => {
+            if (res.status !== 200) {
+                const { message } = await res.json();
+                throw new Error(message);
+            }
+            return await res.json()
+        }).then((data) => {
+            showNotification({
+                title: "Success",
+                message: `Removed term ${term.term}`,
+                color: "green"
+            });
+        }).then(async () => {
+            await getGlossary(id as string);
+        }).catch((err) => {
+            showNotification({
+                title: "There was an issue removing the term",
+                message: `${err}`,
+                color: "red"
+            })
+        });
     }
 
     return (
@@ -160,7 +187,17 @@ const TermsPage = () => {
                                 field === "term" ? <Anchor href={`/glossary/${id}/terms/${i}`} >{term[field] || ""}</Anchor> : term[field] || ""
                             }</td>)}
                             <td>
-                                <ActionIcon size={16} onClick={() => deleteTerm(term)} >
+                                <ActionIcon size={16} onClick={() => openConfirmModal({
+                                    title: `Delete Term`,
+                                    children: (
+                                        <Text>
+                                            Are you sure you want to delete term &quot;{term.term}&quot;
+                                        </Text>
+                                    ),
+                                    labels: { confirm: "Confirm", cancel: "Cancel" },
+                                    onCancel: () => { },
+                                    onConfirm: () => deleteTerm(term, i)
+                                })} >
                                     <IconTrash />
                                 </ActionIcon>
                             </td>

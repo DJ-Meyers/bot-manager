@@ -31,6 +31,25 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<GlossaryTermApi
             return;
         }
         res.status(200).json({ glossary, term });
+    } else if (req.method === "DELETE") {
+        const { collection, client } = await getGlossaryCollection();
+        const payload = await JSON.parse(req.body);
+        const mongoResult = await collection.updateOne({
+            _id: new ObjectId(id as string), owners: session.user.name
+        }, {
+            $pull: { terms: { term: payload.term }}
+        });
+        client.close();
+        if (mongoResult.matchedCount === 1 && mongoResult.matchedCount === mongoResult.modifiedCount) {
+            res.status(200).json({ message: `Succesfully updated glossary ${id}` });
+            return;
+        } else if (mongoResult.matchedCount === 1 && mongoResult.matchedCount !== mongoResult.modifiedCount) {
+            res.status(409).json({ message: `Request rejected because fields haven't changed.` });
+            return;
+        } else {
+            res.status(404).json({ message: `Could not find term ${index} in glossary: ${id}.` });
+            return;
+        }
     } else {
         res.status(405).json({ message: "Invalid HTTP Method" });
         return;
