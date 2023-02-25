@@ -14,7 +14,7 @@ const TermPage = () => {
     useEffect(() => {
         if (!index) return;
         setIsLoading(true);
-        fetch(`/api/glossary/${id}/term/${index}`).then((res) =>
+        fetch(`/api/glossary/${id}/terms/${index}`).then((res) =>
             res.json()
         ).then((data) => {
             setIsLoading(false);

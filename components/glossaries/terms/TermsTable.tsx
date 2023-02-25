@@ -45,7 +45,7 @@ const TermsTable = ({ glossaryId, terms }: { glossaryId: string, terms: ITerm[] 
                     {terms && terms.map((term, i) => 
                         <tr key={i}>
                             {fields.map((field) => <td key={`${i}-${field}`}>{
-                                field === "term" ? <Anchor href={`/glossary/${glossaryId}/term/${i}`} >{term[field] || ""}</Anchor> : term[field] || ""
+                                field === "term" ? <Anchor href={`/glossary/${glossaryId}/terms/${i}`} >{term[field] || ""}</Anchor> : term[field] || ""
                             }</td>)}
                         </tr>
                     )}

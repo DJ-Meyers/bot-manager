@@ -1,5 +1,6 @@
 import { Button, Divider, Group, Loader, MultiSelect, TextInput, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { showNotification } from "@mantine/notifications";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -57,14 +58,35 @@ const GlossaryPage = () => {
     if (!glossary) return <Title order={2}>Glossary not found</Title>
 
 
-    const updateGlossary = () => {
-
+    const updateGlossary = (values: IGlossary) => {
+        fetch(`/api/glossary/${glossary!._id}`, {
+            method: "PATCH",
+            body: JSON.stringify(values)
+        }).then(async (res) => {
+            if (res.status !== 200) {
+                const { message } = await res.json();
+                throw new Error(message);
+            }
+            return res.json()
+        }).then((data) => {
+            showNotification({
+                title: "Success",
+                message: data.message,
+                color: "green"
+            })
+        }).catch((err) => {
+            showNotification({
+                title: "There was an issue updating the glossary",
+                message: `${err}`,
+                color: "red"
+            })
+        });
     }
 
     return (
         <>
             <Title order={2}>Modify {glossary.name}</Title>
-            <form onSubmit={form.onSubmit((values) => console.log(values))} style={{ marginTop: 16 }}>
+            <form onSubmit={form.onSubmit((values) => updateGlossary(values))} style={{ marginTop: 16 }}>
                 <TextInput
                     withAsterisk
                     label="Name"

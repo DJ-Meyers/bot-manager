@@ -1,4 +1,4 @@
-import { Button, Drawer, Textarea, TextInput } from "@mantine/core";
+import { Button, Drawer, Group, Textarea, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { openModal } from "@mantine/modals";
 import { ModalSettings } from "@mantine/modals/lib/context";
@@ -11,10 +11,10 @@ interface TermFormProps {
     setIsOpen: (val: boolean) => void,
     fields: string[],
     modalArgs: ModalSettings,
-    setTerms: (value: SetStateAction<ITerm[]>) => void
+    onSubmit: (value: ITerm) => void
 }
 
-const TermForm = ({ isOpen, setIsOpen, fields, modalArgs, setTerms }: TermFormProps) => {
+const TermForm = ({ isOpen, setIsOpen, fields, modalArgs, onSubmit }: TermFormProps) => {
     const [formState, setFormState] = useState<ITerm>({ term: "", definition: "" });
     
     const termForm = useForm<ITerm>({
@@ -28,10 +28,6 @@ const TermForm = ({ isOpen, setIsOpen, fields, modalArgs, setTerms }: TermFormPr
         });
         termForm.setValues(newTerm);
     }, [fields]);
-
-    const addTerm = (term: ITerm) => {
-        setTerms((curr: ITerm[]) => [...curr, term])
-    }
 
     return (
         <Drawer
@@ -56,8 +52,10 @@ const TermForm = ({ isOpen, setIsOpen, fields, modalArgs, setTerms }: TermFormPr
                         {...termForm.getInputProps(field)}
                     />
                 ))}
-                <Button variant="light" color="blue" onClick={() => openModal(modalArgs)}>Add Field</Button>
-                <Button variant="light" color="green" onClick={() => addTerm(termForm.values)}>Submit</Button>
+                <Group position="right" mt={16} spacing={16}>
+                    <Button variant="light" color="blue" onClick={() => openModal(modalArgs)}>Add Field</Button>
+                    <Button variant="light" color="green" onClick={() => onSubmit(termForm.values)}>Submit</Button>
+                </Group>
             </form>
         </Drawer>
     )

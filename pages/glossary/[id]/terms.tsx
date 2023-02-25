@@ -1,7 +1,7 @@
-import { Anchor, Button, Flex, Group, Loader, Table, Title } from "@mantine/core"
+import { ActionIcon, Anchor, Button, Flex, Group, Loader, Table, Title } from "@mantine/core"
 import { closeAllModals, openModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
-import { IconDeviceFloppy, IconPlus } from "@tabler/icons-react";
+import { IconDeviceFloppy, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -64,8 +64,9 @@ const TermsPage = () => {
     if (isLoading) return <Loader />
 
     const saveTerms = () => {
-        fetch(`/api/glossary/${glossary!._id}`, {
-            method: "PATCH",
+        if (!glossary) return;
+        fetch(`/api/glossary/${glossary!._id}/terms`, {
+            method: "PUT",
             body: JSON.stringify(terms)
         }).then(async (res) => {
             if (res.status !== 200) {
@@ -88,13 +89,44 @@ const TermsPage = () => {
             })
         });
     }
-        
+
+    const addTerm = (term: ITerm) => {
+        if (!glossary) return;
+        fetch(`/api/glossary/${glossary!._id}/terms`, {
+            method: "PATCH",
+            body: JSON.stringify(term)
+        }).then(async (res) => {
+            if (res.status !== 200) {
+                const { message } = await res.json();
+                throw new Error(message);
+            }
+            return res.json()
+        }).then((data) => {
+            setIsOpen(false);
+            setTerms((curr) => [...curr, data]);
+            showNotification({
+                title: "Success",
+                message: `Added ${term.term}`,
+                color: "green"
+            })
+        }).catch((err) => {
+            showNotification({
+                title: "There was an issue saving the terms",
+                message: `${err}`,
+                color: "red"
+            })
+        });
+    }
+
+    const deleteTerm = (term: ITerm) => {
+        console.log("deleting", term);
+    }
 
     return (
         <>
             <Title order={2}>Modify Terms for {glossary?.name}</Title>
-            <TermForm isOpen={isOpen} setIsOpen={setIsOpen} fields={fields} modalArgs={modalArgs} setTerms={setTerms} />
-            <Group spacing={16} mt={16}>
+            <TermForm isOpen={isOpen} setIsOpen={setIsOpen} fields={fields} modalArgs={modalArgs} onSubmit={addTerm} />
+            <Group position="right" spacing={16} mt={16}>
                 <Button
                     variant="default"
                     size="xs"
@@ -118,14 +150,20 @@ const TermsPage = () => {
                 <thead>
                     <tr>
                         {fields.map((field) => <th key={field}>{field}</th>)}
+                        <th>Delete</th>
                     </tr>     
                 </thead>
                 <tbody>
                     {terms && terms.map((term, i) => 
                         <tr key={i}>
                             {fields.map((field) => <td key={`${i}-${field}`}>{
-                                field === "term" ? <Anchor href={`/glossary/${id}/term/${i}`} >{term[field] || ""}</Anchor> : term[field] || ""
+                                field === "term" ? <Anchor href={`/glossary/${id}/terms/${i}`} >{term[field] || ""}</Anchor> : term[field] || ""
                             }</td>)}
+                            <td>
+                                <ActionIcon size={16} onClick={() => deleteTerm(term)} >
+                                    <IconTrash />
+                                </ActionIcon>
+                            </td>
                         </tr>
                     )}
                 </tbody>
