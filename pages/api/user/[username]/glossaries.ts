@@ -1,12 +1,14 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { closeConnection, getGlossaryCollection } from "../../../data/database";
-import { IGlossary } from "../../../data/Glossary";
+import { closeConnection, getGlossaryCollection } from "../../../../data/database";
+
+
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const { username } = req.query;
     const { client, collection } = await getGlossaryCollection();
 
     let data = await collection.find({ owners: username }).toArray();
+
     closeConnection(client);
     if (!data) {
         const res = await collection.insertOne({

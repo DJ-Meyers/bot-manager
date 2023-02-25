@@ -4,6 +4,8 @@ import { MantineProvider } from "@mantine/core";
 import { SessionProvider } from "next-auth/react";
 import { Session } from "next-auth";
 import { Page } from "../components/layout/Page";
+import { ModalsProvider } from "@mantine/modals";
+import { NotificationsProvider } from "@mantine/notifications";
 
 export default function App({
   Component,
@@ -30,9 +32,13 @@ export default function App({
             colorScheme: "dark",
           }}
         >
-          <Page>
-            <Component {...pageProps} />
-          </Page>
+          <ModalsProvider>
+            <NotificationsProvider position="top-right">
+              <Page>
+                <Component {...pageProps} />
+              </Page>
+            </NotificationsProvider>
+          </ModalsProvider>
         </MantineProvider>
       </SessionProvider>
     </>

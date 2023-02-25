@@ -19,21 +19,20 @@ const UserPage = () => {
 
     useEffect(() => {
         setIsLoading(true);
-        fetch(`/api/glossary/${username}`).then((res) =>
+        fetch(`/api/user/${username}/glossaries`).then((res) =>
             res.json()
         ).then((data) => {
-            console.log(data);
-            setGlossaries(data);
             setIsLoading(false);
+            setGlossaries(data);
         });
-    }, [username]);
+    }, [,username]);
 
     return (
         <>
             {isLoading ? (
                 <Loader />
             ) :
-                glossaries.length ? (
+                glossaries.length > 0 ? (
                     <GlossaryManager glossaries={glossaries} session={session} />
                 ) : (
                     <p>No Glossaries Found</p>       
