@@ -3,7 +3,8 @@ import { useForm } from "@mantine/form";
 import { Session } from "next-auth";
 import { useEffect, useState } from "react"
 import { IGlossary } from "../../data/Glossary"
-import TermManager from "./terms/TermManager";
+import GlossarySummary from "./GlossarySummary";
+import TermsTable from "./terms/TermsTable";
 
 type GlossaryManagerProps = {
     glossaries: IGlossary[],
@@ -58,47 +59,7 @@ const GlossaryManager = ({ glossaries, session }: GlossaryManagerProps) => {
                 </List>
             </Box>
             {selectedGlossary &&
-                <Box style={{ flexBasis: "50%" }}>
-                    <Title order={2}>Modify {selectedGlossary.name}</Title>
-                    <Title order={3}>Glossary Metadata</Title>
-                    <form onSubmit={form.onSubmit((values) => console.log(values))}>
-                        <TextInput
-                            withAsterisk
-                            label="Name"
-                            placeholder={session?.user?.name ? `${session.user.name}'s Glossary` : "My Glossary"}
-                            {...form.getInputProps("name")}
-                        />
-                        <MultiSelect
-                            label="Owners"
-                            data={ownersList}
-                            placeholder="Add Owners"
-                            searchable
-                            clearable
-                            creatable
-                            getCreateLabel={(query) => `Add ${query}`}
-                            onCreate={(query) => {
-                                setOwnersList((current) => [...current, query]);
-                                return query;
-                            }}
-                            {...form.getInputProps("owners")}
-                        />
-                        <MultiSelect
-                            label="Subreddits"
-                            data={subredditsList}
-                            placeholder="Add Subreddits"
-                            searchable
-                            clearable
-                            creatable
-                            getCreateLabel={(query) => `Add ${query}`}
-                            onCreate={(query) => {
-                                setSubredditsList((current) => [...current, query]);
-                                return query;
-                            }}
-                            {...form.getInputProps("subreddits")}
-                        />
-                        <TermManager glossary={selectedGlossary} />
-                    </form>
-                </Box>
+                <GlossarySummary glossary={selectedGlossary} session={session} />
             }
         </Flex>
     )

@@ -9,7 +9,11 @@ module.exports = {
         source: '/user',
         destination: '/',
         permanent: true,
-      },
+      }, {
+        source: '/glossary',
+        destination: '/',
+        permanent: true,
+      }
     ]
   },
 }

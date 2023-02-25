@@ -1,21 +1,15 @@
-import { Button, Flex, Group, Table, Title } from "@mantine/core"
-import { SetStateAction, useEffect, useRef, useState } from "react";
-import { ITerm } from "../../../data/Term"
+import { Anchor, Button, Flex, Group, Table, Title } from "@mantine/core";
 import { IconPencil } from "@tabler/icons-react";
-import { IGlossary } from "../../../data/Glossary";
+import { useEffect, useState } from "react";
+import { ITerm } from "../../../data/Term";
 
-export interface TermManagerProps {
-    glossary: IGlossary
-}
-
-
-const TermManager = ({ glossary }: TermManagerProps) => {
+const TermsTable = ({ glossaryId, terms }: { glossaryId: string, terms: ITerm[] }) => {
     const [fields, setFields] = useState<string[]>(["term", "definition"]);
 
     useEffect(() => {
-        if (!glossary) return;
+        if (!terms) return;
         const tempFields: string[] = ["term", "definition"];
-        glossary.terms.forEach((t) => {
+        terms.forEach((t) => {
             Object.keys(t).forEach((field) => {
                 if (!tempFields.includes(field)) {
                     tempFields.push(field);
@@ -23,7 +17,9 @@ const TermManager = ({ glossary }: TermManagerProps) => {
             });
         });
         setFields(tempFields);
-    }, [glossary,]);
+    }, [terms,]);
+
+
 
     return (
         <>
@@ -35,10 +31,10 @@ const TermManager = ({ glossary }: TermManagerProps) => {
                         size="xs"
                         leftIcon={<IconPencil />}
                         component="a"
-                        href={`/glossary/${glossary._id}/terms`}
+                        href={`/glossary/${glossaryId}/terms`}
                     >Edit</Button>
                 </Group>
-            </Flex>  
+            </Flex> 
             <Table mt={16}>
                 <thead>
                     <tr>
@@ -46,10 +42,10 @@ const TermManager = ({ glossary }: TermManagerProps) => {
                     </tr>     
                 </thead>
                 <tbody>
-                    {glossary.terms.map((term, i) => 
+                    {terms && terms.map((term, i) => 
                         <tr key={i}>
                             {fields.map((field) => <td key={`${i}-${field}`}>{
-                                term[field] || ""
+                                field === "term" ? <Anchor href={`/glossary/${glossaryId}/term/${i}`} >{term[field] || ""}</Anchor> : term[field] || ""
                             }</td>)}
                         </tr>
                     )}
@@ -59,4 +55,4 @@ const TermManager = ({ glossary }: TermManagerProps) => {
     )
 }
 
-export default TermManager;
+export default TermsTable;
