@@ -1,4 +1,4 @@
-import { Button, Group } from "@mantine/core";
+import { Button, Group, Text } from "@mantine/core";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 
@@ -7,14 +7,14 @@ export default function IndexPage() {
   return (
     <Group mt={50} position="center">
       {status === "loading" ? (
-        <p>Loading User Session...</p>
+        <Text>Loading User Session...</Text>
       ) :
         session?.user ? (
-          <p>
+          <Text>
             Welcome {session.user?.name}
-          </p>
+          </Text>
         ) : (
-          <p>Sign in to get started</p>
+          <Text>Sign in to get started</Text>
         )
       }
     </Group>

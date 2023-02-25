@@ -1,3 +1,4 @@
+import { ObjectId } from "bson";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
 import { closeConnection, getGlossaryCollection } from "../../../data/database";
@@ -9,7 +10,7 @@ type GlossaryApiResponse = {
 
 const handler = async (req: NextApiRequest, res: NextApiResponse<GlossaryApiResponse>) => {
     const session = await getServerSession(req, res, authOptions);
-    const { name } = req.query;
+    const { id } = req.query;
     if (!session?.user?.name) {
         res.status(401).json({ message: "You must be logged in." });
         return;
@@ -21,7 +22,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<GlossaryApiResp
         const { collection, client } = await getGlossaryCollection();
         const newTerms = JSON.parse(req.body);
         const mongoResult = await collection.updateOne({
-            name: name, owners: session.user.name
+            _id: new ObjectId(id as string), owners: session.user.name
         }, {
             $set: {
                 terms: newTerms

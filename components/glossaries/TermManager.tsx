@@ -42,7 +42,7 @@ const TermManager = ({ terms, setTerms, glossary }: TermManagerProps) => {
     }
 
     const saveTerms = () => {
-        fetch(`/api/glossary/${glossary.name}`, {
+        fetch(`/api/glossary/${glossary._id}`, {
             method: "PATCH",
             body: JSON.stringify(terms)
         }).then(async (res) => {
@@ -52,10 +52,18 @@ const TermManager = ({ terms, setTerms, glossary }: TermManagerProps) => {
             }
             return res.json()
         }).then((data) => {
-            console.log(data);
-            setTerms(data)
+            setTerms(data);
+            showNotification({
+                title: "Success",
+                message: "Updated Terms",
+                color: "green"
+            })
         }).catch((err) => {
-            console.log(err);
+            showNotification({
+                title: "There was an issue saving the terms",
+                message: `${err}`,
+                color: "red"
+            })
         });
     }
 

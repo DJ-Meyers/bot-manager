@@ -1,6 +1,5 @@
-import { List, Loader } from "@mantine/core";
+import { Loader, Text } from "@mantine/core";
 import { useSession } from "next-auth/react";
-import { redirect } from "next/dist/server/api-utils";
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react";
 import GlossaryManager from "../../../components/glossaries/GlossaryManager";
@@ -35,7 +34,7 @@ const UserPage = () => {
                 glossaries.length > 0 ? (
                     <GlossaryManager glossaries={glossaries} session={session} />
                 ) : (
-                    <p>No Glossaries Found</p>       
+                    <Text>No Glossaries Found</Text>       
                 )
             }
         </>
