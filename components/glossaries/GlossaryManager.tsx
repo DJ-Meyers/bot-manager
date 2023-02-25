@@ -44,7 +44,7 @@ const GlossaryManager = ({ glossaries, session }: GlossaryManagerProps) => {
     
     return (
         <Flex>
-            <Box style={{ flexBasis: "50%", flexGrow: 1 }}>
+            <Box style={{ flexBasis: "50%" }}>
                 <Title order={2}>{session?.user?.name}&apos;s Glossaries</Title>
                 <List>
                     {glossaries.map((g) =>

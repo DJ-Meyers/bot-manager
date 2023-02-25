@@ -16,7 +16,7 @@ const GlossarySummary = ({ glossary, session }: GlossarySummaryProps) => {
     if (!glossary) return <Title order={2}>No Glossary to Display</Title>
     
     return (
-        <Box style={{ flexBasis: "50%" }}>
+        <Box style={{ flexGrow: 1 }}>
             <Title order={2}>{glossary.name}</Title>
             <Flex justify="space-between" align="center" mt={16}>
                 <Title order={3}>Preview</Title>
