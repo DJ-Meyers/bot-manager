@@ -1,4 +1,4 @@
-import { Button, Flex, Group, Loader, Table, Title } from "@mantine/core"
+import { Anchor, Button, Flex, Group, Loader, Table, Title } from "@mantine/core"
 import { closeAllModals, openModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import { IconDeviceFloppy, IconPlus } from "@tabler/icons-react";
@@ -124,7 +124,7 @@ const TermsPage = () => {
                     {terms && terms.map((term, i) => 
                         <tr key={i}>
                             {fields.map((field) => <td key={`${i}-${field}`}>{
-                                term[field] || ""
+                                field === "term" ? <Anchor href={`/glossary/${id}/term/${i}`} >{term[field] || ""}</Anchor> : term[field] || ""
                             }</td>)}
                         </tr>
                     )}

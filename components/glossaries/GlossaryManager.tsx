@@ -3,7 +3,6 @@ import { useForm } from "@mantine/form";
 import { Session } from "next-auth";
 import { useEffect, useState } from "react"
 import { IGlossary } from "../../data/Glossary"
-import { ITerm } from "../../data/Term";
 import TermManager from "./terms/TermManager";
 
 type GlossaryManagerProps = {
@@ -15,7 +14,6 @@ const GlossaryManager = ({ glossaries, session }: GlossaryManagerProps) => {
     const [selectedGlossary, setSelectedGlossary] = useState<IGlossary>();
     const [ownersList, setOwnersList] = useState<string[]>([]);
     const [subredditsList, setSubredditsList] = useState<string[]>([]);
-    const [terms, setTerms] = useState<ITerm[]>([]);
 
     const form = useForm<IGlossary>({
         initialValues: {
@@ -31,7 +29,6 @@ const GlossaryManager = ({ glossaries, session }: GlossaryManagerProps) => {
             form.setValues(selectedGlossary);
             setOwnersList(selectedGlossary.owners);
             setSubredditsList(selectedGlossary.subreddits);
-            setTerms(selectedGlossary.terms);
         } else {
             form.setValues({
                 owners: [],
@@ -41,7 +38,6 @@ const GlossaryManager = ({ glossaries, session }: GlossaryManagerProps) => {
             });
             setOwnersList([]);
             setSubredditsList([]);
-            setTerms([]);
         }
     }, [selectedGlossary,]);
     
@@ -100,7 +96,7 @@ const GlossaryManager = ({ glossaries, session }: GlossaryManagerProps) => {
                             }}
                             {...form.getInputProps("subreddits")}
                         />
-                        <TermManager terms={terms} setTerms={setTerms} glossary={selectedGlossary} />
+                        <TermManager glossary={selectedGlossary} />
                     </form>
                 </Box>
             }

@@ -25,7 +25,7 @@ export const Navbar = () => {
                         </Anchor>
                         {session?.user?.name &&
                             <Anchor href={`/user/${session.user.name}`} underline={false} variant="text">
-                                Manage
+                                Glossaries
                             </Anchor>
                         }
                     </Flex>

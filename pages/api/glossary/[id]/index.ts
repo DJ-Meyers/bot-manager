@@ -1,9 +1,9 @@
 import { ObjectId } from "bson";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
-import { closeConnection, getGlossaryCollection } from "../../../data/database";
-import { IGlossary } from "../../../data/Glossary";
-import { authOptions } from "../auth/[...nextauth]";
+import { closeConnection, getGlossaryCollection } from "../../../../data/database";
+import { IGlossary } from "../../../../data/Glossary";
+import { authOptions } from "../../auth/[...nextauth]";
 
 type GlossaryApiResponse = {
     message: string
