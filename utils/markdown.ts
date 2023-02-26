@@ -3,7 +3,7 @@ import { ITerm } from "../data/Term";
 
 export const getCommentFormat = (glossary: IGlossary) => {
     let extraFields: string[] = [];
-    const terms = glossary.terms;
+    const terms = glossary.terms.slice(0, 2);
 
     for (let i = 0; i < terms.length; i++) {
         extraFields = [
@@ -13,9 +13,8 @@ export const getCommentFormat = (glossary: IGlossary) => {
             )
         ];
     }
-
     
-    const output = [...terms.slice(0, 2).map((term) =>
+    const output = [...terms.map((term) =>
 `
 **${term.term}:** ${term.definition}
 

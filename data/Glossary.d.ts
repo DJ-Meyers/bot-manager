@@ -4,6 +4,7 @@ import { ITerm } from "./Term";
 export type CommentOptions = {
     showDividers: boolean,
     showOwners: boolean,
+    recursiveDefinitions: boolean,
     additionalMessage?: string,
 }
 

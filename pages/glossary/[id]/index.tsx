@@ -26,8 +26,9 @@ const GlossaryPage = () => {
             terms: [],
             commentOptions: {
                 showOwners: true,
+                showDividers: true,
+                recursiveDefinitions: true,
                 additionalMessage: "",
-                showDividers: true
             }
         }
     });
@@ -59,6 +60,7 @@ const GlossaryPage = () => {
                 terms: [],
                 commentOptions: {
                     showOwners: true,
+                    recursiveDefinitions: true,
                     additionalMessage: "",
                     showDividers: true
                 }
@@ -141,6 +143,7 @@ const GlossaryPage = () => {
                         <Label>Comment Options</Label>
                         <Checkbox mt={16} label="Show Owners" {...form.getInputProps("commentOptions.showOwners", {type: "checkbox"})} />
                         <Checkbox mt={16} label="Show Dividers" {...form.getInputProps("commentOptions.showDividers", {type: "checkbox"})} />
+                        <Checkbox mt={16} label="Recursive Definitions" {...form.getInputProps("commentOptions.recursiveDefinitions", {type: "checkbox"})} />
                         <TextInput mt={16} label="Additional Message" {...form.getInputProps("commentOptions.additionalMessage")} />
                     </Box>
                     <div style={{ flexBasis: "50%", height: "100%" }}>
