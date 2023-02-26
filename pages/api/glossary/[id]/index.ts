@@ -18,14 +18,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<GlossaryApiResp
     }
     if (req.method === "PATCH") {
         const { collection, client } = await getGlossaryCollection();
-        const { owners, subreddits, name } = JSON.parse(req.body);
+        const { owners, subreddits, name, commentOptions: { showDividers, showOwners, additionalMessage} } = JSON.parse(req.body);
         const mongoResult = await collection.updateOne({
             _id: new ObjectId(id as string), owners: session.user.name
         }, {
             $set: {
                 owners: owners,
                 subreddits: subreddits,
-                name: name
+                name: name,
+                commentOptions: {
+                    showDividers: showDividers,
+                    showOwners: showOwners,
+                    additionalMessage: additionalMessage
+                }
             }
         });
 

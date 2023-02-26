@@ -1,4 +1,4 @@
-import { Button, Divider, Group, Loader, MultiSelect, TextInput, Title } from "@mantine/core";
+import { Box, Button, Divider, Flex, Group, Loader, MultiSelect, Text, TextInput, Title, Checkbox } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import { useSession } from "next-auth/react";
@@ -6,6 +6,9 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import TermsTable from "../../../components/glossaries/terms/TermsTable";
 import { IGlossary } from "../../../data/Glossary";
+import ReactMarkdown from "react-markdown";
+import { getCommentFormat } from "../../../utils/markdown";
+import Label from "../../../components/text/label";
 
 const GlossaryPage = () => {
     const router = useRouter();
@@ -13,15 +16,19 @@ const GlossaryPage = () => {
     const { data: session, status } = useSession({ required: true });
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [glossary, setGlossary] = useState<IGlossary>();
-    const [ownersList, setOwnersList] = useState<string[]>([]);
-    const [subredditsList, setSubredditsList] = useState<string[]>([]);
+    const [commentPreview, setCommentPreview] = useState<string>("");
 
     const form = useForm<IGlossary>({
         initialValues: {
             owners: [],
             name: "",
             subreddits: [],
-            terms: []
+            terms: [],
+            commentOptions: {
+                showOwners: true,
+                additionalMessage: "",
+                showDividers: true
+            }
         }
     });
 
@@ -37,19 +44,25 @@ const GlossaryPage = () => {
     }, [id]);
 
     useEffect(() => {
+        if (!form) return;
+        setCommentPreview(getCommentFormat(form.values));
+    }, [form.values])
+
+    useEffect(() => {
         if (glossary) {
             form.setValues(glossary);
-            setOwnersList(glossary.owners);
-            setSubredditsList(glossary.subreddits);
         } else {
             form.setValues({
                 owners: [],
                 name: "",
                 subreddits: [],
-                terms: []
+                terms: [],
+                commentOptions: {
+                    showOwners: true,
+                    additionalMessage: "",
+                    showDividers: true
+                }
             });
-            setOwnersList([]);
-            setSubredditsList([]);
         }
     }, [glossary,]);
 
@@ -95,32 +108,55 @@ const GlossaryPage = () => {
                 />
                 <MultiSelect
                     label="Owners"
-                    data={ownersList}
+                    data={glossary.owners}
                     placeholder="Add Owners"
                     searchable
                     clearable
                     creatable
                     getCreateLabel={(query) => `Add ${query}`}
                     onCreate={(query) => {
-                        setOwnersList((current) => [...current, query]);
+                        glossary.owners.push(query);
                         return query;
                     }}
                     {...form.getInputProps("owners")}
                 />
                 <MultiSelect
                     label="Subreddits"
-                    data={subredditsList}
+                    data={glossary.subreddits}
                     placeholder="Add Subreddits"
                     searchable
                     clearable
                     creatable
                     getCreateLabel={(query) => `Add ${query}`}
                     onCreate={(query) => {
-                        setSubredditsList((current) => [...current, query]);
+                        glossary.subreddits.push(query);
                         return query;
                     }}
                     {...form.getInputProps("subreddits")}
                 />
+                <Flex mt={16} gap={16}>
+                    <Box sx={(theme) => ({
+                        flexBasis: "50%"
+                    })}>
+                        <Label>Comment Options</Label>
+                        <Checkbox mt={16} label="Show Owners" {...form.getInputProps("commentOptions.showOwners", {type: "checkbox"})} />
+                        <Checkbox mt={16} label="Show Dividers" {...form.getInputProps("commentOptions.showDividers", {type: "checkbox"})} />
+                        <TextInput mt={16} label="Additional Message" {...form.getInputProps("commentOptions.additionalMessage")} />
+                    </Box>
+                    <div style={{ flexBasis: "50%", height: "100%" }}>
+                        <Label>Preview</Label>
+                        <Box sx={(theme) => ({
+                            borderRadius: theme.radius.md,
+                            backgroundColor: theme.colors.gray[9],
+                            padding: 8,
+                            marginTop: 16
+                        })}>
+                            <ReactMarkdown>
+                                {commentPreview}
+                            </ReactMarkdown>
+                        </Box>
+                    </div>
+                </Flex>
                 <Group position="right" my={16}>
                     <Button variant="gradient" type="submit">
                         Save Changes
