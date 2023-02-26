@@ -1,25 +1,30 @@
 import { Button, TextInput } from "@mantine/core";
+import { useForm } from "@mantine/form";
 import { useState } from "react";
 
 const FieldModal = ({ clickHandler, fields }: { clickHandler: (val:string) => void, fields: string[] }) => {
-    const [newFieldName, setNewFieldName] = useState<string>("");
+    const form = useForm<{ field: string }>({
+        initialValues: {
+            field: ""
+        },
+        validate: {
+            field: (value) => (fields.includes(value) ? "Duplicate field" : null)
+        }
+    });
     
     return (
-        <>
+        <form onSubmit={form.onSubmit((values) => clickHandler(values.field))}>
             <TextInput
                 label="Field Name"
                 placeholder="field_name"
                 data-autofocus
-                defaultValue={newFieldName}
-                onChange={(e) => { setNewFieldName(e.target.value) }}
-                error={fields.includes(newFieldName) ? "Duplicate Field" : null}
+                {...form.getInputProps("field")}
             />
             <Button
                 type="submit"
-                onClick={() => clickHandler(newFieldName)}
                 fullWidth
             >Submit</Button>
-        </>
+        </form>
     );
 }
 
