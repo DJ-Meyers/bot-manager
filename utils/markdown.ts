@@ -1,19 +1,10 @@
 import { IGlossary } from "../data/Glossary";
 import { ITerm } from "../data/Term";
+import { getExtraFields } from "../data/utils";
 
 export const getCommentFormat = (glossary: IGlossary) => {
-    let extraFields: string[] = [];
     const terms = glossary.terms.slice(0, 2);
-
-    for (let i = 0; i < terms.length; i++) {
-        extraFields = [
-            ...extraFields,
-            ...Object.keys(terms[i]).filter((field) =>
-                field !== "term" && field !== "definition" && !extraFields.includes(field)
-            )
-        ];
-    }
-    
+    const extraFields = getExtraFields(glossary);
     const output = [...terms.map((term) =>
 `
 **${term.term}:** ${term.definition}
