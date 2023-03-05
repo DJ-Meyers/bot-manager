@@ -1,7 +1,7 @@
-import { ActionIcon, Anchor, Button, Group, Loader, Table, Title, Text } from "@mantine/core"
+import { ActionIcon, Anchor, Button, Group, Loader, Table, Title, Text, Flex, Autocomplete } from "@mantine/core"
 import { closeAllModals, openConfirmModal, openModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
-import { IconDeviceFloppy, IconPlus, IconTrash } from "@tabler/icons-react";
+import { IconDeviceFloppy, IconPlus, IconSearch, IconTrash } from "@tabler/icons-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -19,6 +19,7 @@ const TermsPage = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [fields, setFields] = useState<string[]>(["term", "definition"]);
     const [terms, setTerms] = useState<ITerm[]>([]);
+    const [searchValue, setSearchValue] = useState<string>();
 
     useEffect(() => {
         if (!terms) return;
@@ -148,30 +149,47 @@ const TermsPage = () => {
         });
     }
 
+    if (!glossary) {
+        return (
+            <>
+                <Title order={2}>Could not find glossary {id}</Title>
+            </>
+        )
+    }
+
     return (
         <>
-            <Title order={2}>Modify Terms for {glossary?.name}</Title>
+            <Title order={2}>Modify Terms for {glossary.name}</Title>
             <TermForm isOpen={isOpen} setIsOpen={setIsOpen} fields={fields} modalArgs={modalArgs} onSubmit={addTerm} />
-            <Group position="right" spacing={16} mt={16}>
-                <Button
-                    variant="default"
-                    size="xs"
-                    leftIcon={<IconDeviceFloppy />}
-                    onClick={saveTerms}
-                >Save</Button>
-                <Button
-                    variant="default"
-                    size="xs"
-                    leftIcon={<IconPlus />}
-                    onClick={() => setIsOpen(true)}
-                >Term</Button>
-                <Button
-                    variant="default"
-                    size="xs"
-                    leftIcon={<IconPlus />}
-                    onClick={() => openModal(modalArgs)}
-                >Field</Button>
-            </Group>
+            <Flex justify="space-between" align="center" mt={16} gap={16}>
+                <Autocomplete
+                    icon={<IconSearch />}
+                    data={glossary.terms.map((t) => t.term)}
+                    value={searchValue}
+                    onChange={setSearchValue}
+                    style={{ flexGrow: 1 }}
+                />
+                <Group position="right" spacing={16}>
+                    <Button
+                        variant="default"
+                        size="xs"
+                        leftIcon={<IconDeviceFloppy />}
+                        onClick={saveTerms}
+                        >Save</Button>
+                    <Button
+                        variant="default"
+                        size="xs"
+                        leftIcon={<IconPlus />}
+                        onClick={() => setIsOpen(true)}
+                        >Term</Button>
+                    <Button
+                        variant="default"
+                        size="xs"
+                        leftIcon={<IconPlus />}
+                        onClick={() => openModal(modalArgs)}
+                        >Field</Button>
+                </Group>
+            </Flex>
             <Table mt={16}>
                 <thead>
                     <tr>
@@ -180,7 +198,7 @@ const TermsPage = () => {
                     </tr>     
                 </thead>
                 <tbody>
-                    {terms && terms.map((term, i) => 
+                    {terms && (searchValue ? terms.filter((t) => t.term.includes(searchValue)) : terms).map((term, i) => 
                         <tr key={i}>
                             {fields.map((field) => <td key={`${i}-${field}`}>{
                                 field === "term" ? <Anchor href={`/glossary/${id}/terms/${i}`} >{term[field] || ""}</Anchor> : term[field] || ""
