@@ -1,12 +1,10 @@
 import { ObjectId } from "bson";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
-import { getGlossaryCollection } from "../../../../../data/database";
+import { getGlossaryCollection, GlossaryApiResponse, handleUpdateResults, insertTermForGlossary, updateTermsForGlossary } from "../../../../../data/database";
+import { IGlossary } from "../../../../../data/Glossary";
+import { ITerm } from "../../../../../data/Term";
 import { authOptions } from "../../../auth/[...nextauth]";
-
-type GlossaryApiResponse = {
-    message: string
-} | JSON
 
 const handler = async (req: NextApiRequest, res: NextApiResponse<GlossaryApiResponse>) => {
     const session = await getServerSession(req, res, authOptions);
@@ -16,49 +14,31 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<GlossaryApiResp
         return;
     }
     if (req.method === "PUT") {
-        const { collection, client } = await getGlossaryCollection();
         const newTerms = JSON.parse(req.body);
-        const mongoResult = await collection.updateOne({
-            _id: new ObjectId(id as string), owners: session.user.name
-        }, {
-            $set: {
-                terms: newTerms
-            }
-        });
+        const updateResult = await updateTermsForGlossary(id as string, newTerms, session.user.name);
 
-        client.close();
-        if (mongoResult.matchedCount === 1 && mongoResult.matchedCount === mongoResult.modifiedCount) {
-            res.status(200).json(newTerms);
-            return;
-        } else if (mongoResult.matchedCount === 1 && mongoResult.matchedCount !== mongoResult.modifiedCount) {
-            res.status(409).json({ message: `Request rejected because Terms haven't changed.` });
-            return;
-        } else {
-            res.status(404).json({ message: `Could not find glossary owned by ${session.user.name} with id: ${id}.` });
-            return;
-        }
+        return await handleUpdateResults(
+            res,
+            updateResult,
+            {
+                200: { ...newTerms },
+                409: { message: "Request rejected because Terms haven't changed." },
+                404: { message: `Could not find glossary owned by ${session.user.name} with id: ${id}.` }
+            }
+        )
     } else if (req.method === "PATCH") {
-        const { collection, client } = await getGlossaryCollection();
         const newTerm = JSON.parse(req.body);
-        const mongoResult = await collection.updateOne({
-            _id: new ObjectId(id as string), owners: session.user.name
-        }, {
-            $push: {
-                terms: newTerm
-            }
-        });
+        const updateResult = await insertTermForGlossary(id as string, newTerm, session.user.name);
 
-        client.close();
-        if (mongoResult.matchedCount === 1 && mongoResult.matchedCount === mongoResult.modifiedCount) {
-            res.status(200).json(newTerm);
-            return;
-        } else if (mongoResult.matchedCount === 1 && mongoResult.matchedCount !== mongoResult.modifiedCount) {
-            res.status(409).json({ message: `Request rejected because Terms haven't changed.` });
-            return;
-        } else {
-            res.status(404).json({ message: `Could not find glossary owned by ${session.user.name} with id: ${id}.` });
-            return;
-        }
+        return await handleUpdateResults(
+            res,
+            updateResult,
+            {
+                200: { ...newTerm },
+                409: { message: "Request rejected because Terms haven't changed." },
+                404: { message: `Could not find glossary owned by ${session.user.name} with id: ${id}.` }
+            }
+        )
     } else {
         res.status(405).json({ message: "Invalid HTTP Method" });
         return;

@@ -1,6 +1,12 @@
 import { MongoClient, ObjectId, UpdateResult } from "mongodb";
+import { NextApiResponse } from "next";
 import { IGlossary } from "./Glossary";
 import { ITerm } from "./Term";
+
+
+export type GlossaryApiResponse = {
+    message: string
+} | JSON | { glossary: IGlossary, term: ITerm } | IGlossary
 
 export const getDbUrl = () => process.env.DATABASE_URL || "";
 
@@ -8,6 +14,33 @@ export async function getMongoClient() {
     const client = new MongoClient(getDbUrl());
     await client.connect();
     return client;
+}
+
+/**
+ * @returns {Promise<UpdateResult>} Promise that returns the UpdateResult which contains data about the update
+ * operation
+ */
+export async function deleteTermByName(id: string, name: string, username: string): Promise<UpdateResult> {
+    const { collection, client } = await getGlossaryCollection();
+    const updateResult = await collection.updateOne({
+        _id: new ObjectId(id as string), owners: username
+    }, {
+        $pull: { terms: { term: name } }
+    });
+    client.close();
+
+    return updateResult;
+}
+
+/**
+ * @returns {Promise<IGlossary>} Promise that returns the first glossary with the given id that has the given
+ * username in its owners array.
+ */
+export async function getGlossaryById(id: string, username: string): Promise<IGlossary> {
+    const { collection, client } = await getGlossaryCollection();
+    const glossary = (await collection.findOne({ _id: new ObjectId(id as string), owners: username })) as IGlossary;
+    client.close();
+    return glossary;
 }
 
 /**
@@ -28,7 +61,7 @@ export async function getGlossaryCollection() {
 export async function getGlossaryiesForUser(username: string): Promise<IGlossary[]> {
     const { client, collection } = await getGlossaryCollection();
     let data = await collection.find({ owners: username }).toArray();
-    
+
     if (!data) {
         const res = await collection.insertOne({
             name: `${username}'s Glossary`,
@@ -44,14 +77,22 @@ export async function getGlossaryiesForUser(username: string): Promise<IGlossary
 }
 
 /**
- * @returns {Promise<IGlossary>} Promise that returns the first glossary with the given id that has the given
- * username in its owners array.
+ * Append an `ITerm` to the the `terms` field of a Glossary in the database
+ * @returns {Promise<UpdateResult>} Promise that returns the UpdateResult which contains data about the update
+ * operation
  */
-export async function getGlossaryById(id: string, username: string): Promise<IGlossary> {
+export async function insertTermForGlossary(id: string, term: ITerm, username: string) {
     const { collection, client } = await getGlossaryCollection();
-    const glossary = (await collection.findOne({ _id: new ObjectId(id as string), owners: username })) as IGlossary;
+    const updateResult = await collection.updateOne({
+        _id: new ObjectId(id as string), owners: username
+    }, {
+        $push: {
+            terms: term
+        }
+    });
     client.close();
-    return glossary;
+
+    return updateResult;
 }
 
 /**
@@ -77,17 +118,73 @@ export async function updateTermByIndex(id: string, index: number, payload: ITer
 }
 
 /**
+ * Overwrite the fields of a Glossary in the database
  * @returns {Promise<UpdateResult>} Promise that returns the UpdateResult which contains data about the update
  * operation
  */
-export async function deleteTermByName(id: string, name: string, username: string): Promise<UpdateResult> {
+export async function updateGlossaryById(id: string, glossary: IGlossary, username: string) {
+    if (!glossary || !glossary.commentOptions) return Promise.reject();
+
     const { collection, client } = await getGlossaryCollection();
     const updateResult = await collection.updateOne({
         _id: new ObjectId(id as string), owners: username
     }, {
-        $pull: { terms: { term: name } }
+        $set: {
+            owners: glossary.owners,
+            subreddits: glossary.subreddits,
+            name: glossary.name,
+            commentOptions: {
+                showDividers: glossary.commentOptions.showDividers,
+                showOwners: glossary.commentOptions.showOwners,
+                recursiveDefinitions: glossary.commentOptions.recursiveDefinitions,
+                additionalMessage: glossary.commentOptions.additionalMessage
+            }
+        }
     });
     client.close();
 
     return updateResult;
+}
+
+/**
+ * Overwrite the `terms` field of a Glossary in the database
+ * @returns {Promise<UpdateResult>} Promise that returns the UpdateResult which contains data about the update
+ * operation
+ */
+export async function updateTermsForGlossary(id: string, terms: ITerm[], username: string): Promise<UpdateResult> {
+    const { collection, client } = await getGlossaryCollection();
+    const updateResult = await collection.updateOne({
+        _id: new ObjectId(id as string), owners: username
+    }, {
+        $set: {
+            terms: terms
+        }
+    });
+
+    client.close();
+
+    return updateResult;
+}
+
+
+/**
+ * Handle the logic for responding to different response codes.  Takes in an array of objects that have a response code
+ * and a message or json object
+ * @returns {void}
+ */
+export async function handleUpdateResults(
+    res: NextApiResponse<GlossaryApiResponse>,
+    updateResult: UpdateResult,
+    responses: { [n: number]: GlossaryApiResponse }
+): Promise<void> {
+    if (updateResult.matchedCount === 1 && updateResult.matchedCount === updateResult.modifiedCount) {
+        res.status(200).json(responses[200]);
+        return;
+    } else if (updateResult.matchedCount === 1 && updateResult.matchedCount !== updateResult.modifiedCount) {
+        res.status(409).json(responses[409]);
+        return;
+    } else {
+        res.status(404).json(responses[404]);
+        return;
+    }
 }
