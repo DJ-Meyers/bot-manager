@@ -6,7 +6,7 @@ interface childrenProps {
 
 const Label = ({ children }: childrenProps) => {
     return (
-        <Text className="mantine-InputWrapper-label mantine-MultiSelect-label mantine-1hwfu2">
+        <Text className="mantine-InputWrapper-label mantine-MultiSelect-label">
             {children}
         </Text>
     )

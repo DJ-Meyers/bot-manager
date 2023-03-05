@@ -1,6 +1,6 @@
 import { IGlossary } from "./Glossary";
 
-export const getExtraFields = (glossary: IGlossary) => {
+export function getExtraFields(glossary: IGlossary) {
     let extraFields: string[] = [];
     for (let i = 0; i < glossary.terms.length; i++) {
         extraFields = [

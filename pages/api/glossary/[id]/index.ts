@@ -13,9 +13,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<GlossaryApiResp
         res.status(401).json({ message: "You must be logged in." });
         return;
     }
+
+    const username = session.user.name;
+
     if (req.method === "PATCH") {        
         const newValues = JSON.parse(req.body);
-        const updateResult = await updateGlossaryById(id as string, newValues, session.user.name);
+        const updateResult = await updateGlossaryById(id as string, username, newValues);
 
         return handleUpdateResults(
             res,
@@ -23,11 +26,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<GlossaryApiResp
             {
                 200: { message: `Succesfully updated glossary ${id}` },
                 409: { message: `Request rejected because fields haven't changed.` },
-                404: { message: `Could not find glossary owned by ${session.user.name} with id: ${id}.` }
+                404: { message: `Could not find glossary owned by ${username} with id: ${id}.` }
             }
         )
     } else if (req.method === "GET") {
-        const glossary = await getGlossaryById(id as string, session.user.name);
+        const glossary = await getGlossaryById(id as string, username);
         if (!glossary) {
             res.status(404).json({ message: `Could not find glossary with id: ${id}` });
             return;

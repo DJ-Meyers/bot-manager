@@ -1,8 +1,6 @@
-import { ObjectId } from "bson";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
-import { deleteTermByName, getGlossaryById, getGlossaryCollection, GlossaryApiResponse, handleUpdateResults, updateTermByIndex } from "../../../../../data/database";
-import { IGlossary } from "../../../../../data/Glossary";
+import { deleteTermByName, getGlossaryById, GlossaryApiResponse, handleUpdateResults, updateTermByIndex } from "../../../../../data/database";
 import { ITerm } from "../../../../../data/Term";
 import { authOptions } from "../../../auth/[...nextauth]";
 
@@ -14,9 +12,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<GlossaryApiResp
         res.status(401).json({ message: "You must be logged in." });
         return;
     }
+    const username = session.user.name;
 
     if (req.method === "GET") {
-        const glossary = await getGlossaryById(id as string, session.user.name);
+        const glossary = await getGlossaryById(id as string, username);
 
         if (!glossary) {
             res.status(404).json({ message: `Could not find glossary with id: ${id}` });
@@ -46,7 +45,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<GlossaryApiResp
         );
     } else if (req.method === "DELETE") {
         const payload = await JSON.parse(req.body);
-        const updateResult = await deleteTermByName(id as string, payload.term, session.user.name);
+        const updateResult = await deleteTermByName(id as string, username, payload.term);
         
         return await handleUpdateResults(
             res,
