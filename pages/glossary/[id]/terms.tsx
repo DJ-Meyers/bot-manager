@@ -104,7 +104,7 @@ const TermsPage = () => {
         });
         }
     
-    const addTerm = (term: ITerm) => {
+    function addTerm(term: ITerm) {
         if (!glossary) return;
         fetch(`/api/glossary/${glossary!._id}/terms`, {
             method: "PATCH",
@@ -132,7 +132,7 @@ const TermsPage = () => {
         });
     }
 
-    const deleteTerm = (term: ITerm, index: number) => {
+    function deleteTerm(term: ITerm, index: number) {
         fetch(`/api/glossary/${id}/terms/${index}`, {
             method: "DELETE",
             body: JSON.stringify(term)
@@ -252,7 +252,7 @@ const TermsPage = () => {
                                                 }
                                             )}
                                         >
-                                            <IconTrash size="1rem" />
+                                            <IconTrash />
                                         </ActionIcon>
                                     }
                             </Flex></th>
@@ -282,7 +282,7 @@ const TermsPage = () => {
                                     onCancel: () => { },
                                     onConfirm: () => deleteTerm(term, i)
                                 })} >
-                                    <IconTrash size="1rem" />
+                                    <IconTrash />
                                 </ActionIcon>
                             </td>
                         </tr>

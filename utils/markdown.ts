@@ -2,7 +2,7 @@ import { IGlossary } from "../data/Glossary";
 import { ITerm } from "../data/Term";
 import { getExtraFields } from "../data/utils";
 
-export const getCommentFormat = (glossary: IGlossary) => {
+export function getCommentFormat(glossary: IGlossary) {
     const terms = glossary.terms.slice(0, 2);
     const extraFields = getExtraFields(glossary);
     const output = [...terms.map((term) =>
@@ -36,7 +36,4 @@ export const getCommentFormat = (glossary: IGlossary) => {
 
 
 `);
-}
-
-export const interpolateVariables = (format: string, terms: ITerm[]) => {
 }

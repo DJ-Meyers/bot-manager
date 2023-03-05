@@ -2,7 +2,6 @@ import { AppProps } from "next/app";
 import Head from "next/head";
 import { Loader, MantineProvider } from "@mantine/core";
 import { SessionProvider, useSession } from "next-auth/react";
-import { Session } from "next-auth";
 import { Page } from "../components/layout/Page";
 import { ModalsProvider } from "@mantine/modals";
 import { NotificationsProvider } from "@mantine/notifications";

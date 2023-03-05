@@ -1,6 +1,5 @@
-import { Button, Group, Text } from "@mantine/core";
-import { signIn, signOut, useSession } from "next-auth/react";
-import Link from "next/link";
+import { Group, Text } from "@mantine/core";
+import { useSession } from "next-auth/react";
 
 export default function IndexPage() {
   const { data: session, status } = useSession();

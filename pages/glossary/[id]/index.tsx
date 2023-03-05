@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Flex, Group, Loader, MultiSelect, Text, TextInput, Title, Checkbox } from "@mantine/core";
+import { Box, Button, Divider, Flex, Group, Loader, MultiSelect, TextInput, Title, Checkbox } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import { useSession } from "next-auth/react";
@@ -73,7 +73,7 @@ const GlossaryPage = () => {
     if (!glossary) return <Title order={2}>Glossary not found</Title>
 
 
-    const updateGlossary = (values: IGlossary) => {
+    function updateGlossary(values: IGlossary) {
         fetch(`/api/glossary/${glossary!._id}`, {
             method: "PATCH",
             body: JSON.stringify(values)

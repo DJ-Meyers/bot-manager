@@ -1,6 +1,5 @@
 import { Loader, Text, Title } from "@mantine/core";
 import { useSession } from "next-auth/react";
-import { redirect } from "next/dist/server/api-utils";
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react";
 import GlossaryManager from "../../../components/glossaries/GlossaryManager";

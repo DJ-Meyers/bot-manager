@@ -6,10 +6,9 @@ import { Navbar } from "./Navbar"
 
 interface props {
     children: ReactElement,
-    breadcrumbs: ReactElement[]
 }
 
-export const Page = ({ children, breadcrumbs }: props) => {
+export const Page = ({ children }: props) => {
     return (
         <>
             <Head>

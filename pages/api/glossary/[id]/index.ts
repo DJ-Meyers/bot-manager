@@ -1,8 +1,6 @@
-import { ObjectId } from "bson";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
-import { getGlossaryById, getGlossaryCollection, GlossaryApiResponse, handleUpdateResults, updateGlossaryById } from "../../../../data/database";
-import { IGlossary } from "../../../../data/Glossary";
+import { getGlossaryById, GlossaryApiResponse, handleUpdateResults, updateGlossaryById } from "../../../../data/database";
 import { authOptions } from "../../auth/[...nextauth]";
 
 

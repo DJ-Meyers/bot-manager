@@ -75,7 +75,7 @@ const TermPage = () => {
 
     const extraFields = getExtraFields(glossary);
 
-    const addField = (field: string) => {
+    function addField(field: string) {
         setFields((curr) => [...curr, field]);
         closeAllModals();
     }
