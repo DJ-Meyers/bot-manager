@@ -20,12 +20,28 @@ export async function getMongoClient() {
  * @returns {Promise<UpdateResult>} Promise that returns the UpdateResult which contains data about the update
  * operation
  */
-export async function deleteTermByName(id: string, name: string, username: string): Promise<UpdateResult> {
+export async function deleteTermByName(id: string, username: string, name: string): Promise<UpdateResult> {
     const { collection, client } = await getGlossaryCollection();
     const updateResult = await collection.updateOne({
-        _id: new ObjectId(id as string), owners: username
+        _id: new ObjectId(id), owners: username
     }, {
         $pull: { terms: { term: name } }
+    });
+    client.close();
+
+    return updateResult;
+}
+
+export async function deleteFieldForAllTermsInGlossary(id: string, username: string, fieldName: string): Promise<UpdateResult> {
+    const { collection, client } = await getGlossaryCollection();
+    const nestedFieldName = ["terms", "$[]", fieldName].join(".");
+    const unsetObj: { [s: string]: string } = {};
+    unsetObj[nestedFieldName] = "";
+
+    const updateResult = await collection.updateOne({
+        _id: new ObjectId(id), owners: username
+    }, {
+        $unset: unsetObj
     });
     client.close();
 
@@ -38,7 +54,7 @@ export async function deleteTermByName(id: string, name: string, username: strin
  */
 export async function getGlossaryById(id: string, username: string): Promise<IGlossary> {
     const { collection, client } = await getGlossaryCollection();
-    const glossary = (await collection.findOne({ _id: new ObjectId(id as string), owners: username })) as IGlossary;
+    const glossary = (await collection.findOne({ _id: new ObjectId(id), owners: username })) as IGlossary;
     client.close();
     return glossary;
 }
@@ -81,10 +97,10 @@ export async function getGlossaryiesForUser(username: string): Promise<IGlossary
  * @returns {Promise<UpdateResult>} Promise that returns the UpdateResult which contains data about the update
  * operation
  */
-export async function insertTermForGlossary(id: string, term: ITerm, username: string) {
+export async function insertTermForGlossary(id: string, username: string, term: ITerm) {
     const { collection, client } = await getGlossaryCollection();
     const updateResult = await collection.updateOne({
-        _id: new ObjectId(id as string), owners: username
+        _id: new ObjectId(id), owners: username
     }, {
         $push: {
             terms: term
@@ -108,7 +124,7 @@ export async function updateTermByIndex(id: string, index: number, payload: ITer
     }
 
     const updateResult = await collection.updateOne({
-        "_id": new ObjectId(id as string),
+        "_id": new ObjectId(id),
     }, {
         $set: newTerm
     });
@@ -122,12 +138,12 @@ export async function updateTermByIndex(id: string, index: number, payload: ITer
  * @returns {Promise<UpdateResult>} Promise that returns the UpdateResult which contains data about the update
  * operation
  */
-export async function updateGlossaryById(id: string, glossary: IGlossary, username: string) {
+export async function updateGlossaryById(id: string, username: string, glossary: IGlossary) {
     if (!glossary || !glossary.commentOptions) return Promise.reject();
 
     const { collection, client } = await getGlossaryCollection();
     const updateResult = await collection.updateOne({
-        _id: new ObjectId(id as string), owners: username
+        _id: new ObjectId(id), owners: username
     }, {
         $set: {
             owners: glossary.owners,
@@ -151,7 +167,7 @@ export async function updateGlossaryById(id: string, glossary: IGlossary, userna
  * @returns {Promise<UpdateResult>} Promise that returns the UpdateResult which contains data about the update
  * operation
  */
-export async function updateTermsForGlossary(id: string, terms: ITerm[], username: string): Promise<UpdateResult> {
+export async function updateTermsForGlossary(id: string, username: string, terms: ITerm[]): Promise<UpdateResult> {
     const { collection, client } = await getGlossaryCollection();
     const updateResult = await collection.updateOne({
         _id: new ObjectId(id as string), owners: username

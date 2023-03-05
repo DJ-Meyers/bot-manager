@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import FieldModal from "../../../components/glossaries/terms/FieldModal";
 import TermForm from "../../../components/glossaries/terms/TermForm";
+import { deleteFieldForAllTermsInGlossary } from "../../../data/database";
 import { IGlossary } from "../../../data/Glossary";
 import { ITerm } from "../../../data/Term";
 
@@ -149,6 +150,33 @@ const TermsPage = () => {
         });
     }
 
+    const deleteField = (fieldName: string) => {
+        fetch(`/api/glossary/${id}/terms`, {
+            method: "DELETE",
+            body: JSON.stringify({ fieldName })
+        }).then(async (res) => {
+            if (res.status !== 200) {
+                const { message } = await res.json();
+                throw new Error(message);
+            }
+            return await res.json()
+        }).then((data) => {
+            showNotification({
+                title: "Success",
+                message: `Removed field ${fieldName}`,
+                color: "green"
+            });
+        }).then(async () => {
+            await getGlossary(id as string);
+        }).catch((err) => {
+            showNotification({
+                title: "There was an issue removing the field",
+                message: `${err}`,
+                color: "red"
+            })
+        });
+    }
+
     if (!glossary) {
         return (
             <>
@@ -175,26 +203,50 @@ const TermsPage = () => {
                         size="xs"
                         leftIcon={<IconDeviceFloppy />}
                         onClick={saveTerms}
-                        >Save</Button>
-                    <Button
-                        variant="default"
-                        size="xs"
-                        leftIcon={<IconPlus />}
-                        onClick={() => setIsOpen(true)}
-                        >Term</Button>
+                    >
+                        Save
+                    </Button>
                     <Button
                         variant="default"
                         size="xs"
                         leftIcon={<IconPlus />}
                         onClick={() => openModal(modalArgs)}
-                        >Field</Button>
+                    >
+                        Field
+                    </Button>
                 </Group>
             </Flex>
             <Table mt={16}>
                 <thead>
                     <tr>
-                        {fields.map((field) => <th key={field}>{field}</th>)}
-                        <th>Delete</th>
+                        {fields.map((field) =>
+                            <th key={field}><Flex align="center" gap={8}>
+                                {field} {
+                                    !["term", "definition"].includes(field) && 
+                                        <ActionIcon
+                                            color="red"
+                                            variant="filled"
+                                            size="xs"
+                                            style={{ display: "inline" }}
+                                            onClick={() => openConfirmModal({
+                                                title: <Title order={3} color="red">DANGER: This action cannnot be undone</Title>,
+                                                children: (
+                                                    <Text>
+                                                            Are you sure you want to delete field &quot;{field}&quot; from all Terms in this Glossary?
+                                                        </Text>
+                                                    ),
+                                                    labels: { confirm: "Confirm", cancel: "Cancel" },
+                                                    onCancel: () => { },
+                                                    onConfirm: () => deleteField(field)
+                                                }
+                                            )}
+                                        >
+                                            <IconTrash size="1rem" />
+                                        </ActionIcon>
+                                    }
+                            </Flex></th>
+                        )}
+                        <th>Delete Term</th>
                     </tr>     
                 </thead>
                 <tbody>
@@ -204,7 +256,11 @@ const TermsPage = () => {
                                 field === "term" ? <Anchor href={`/glossary/${id}/terms/${i}`} >{term[field] || ""}</Anchor> : term[field] || ""
                             }</td>)}
                             <td>
-                                <ActionIcon size={16} onClick={() => openConfirmModal({
+                                <ActionIcon
+                                    color="red"
+                                    variant="filled"
+                                    size="xs"
+                                    onClick={() => openConfirmModal({
                                     title: `Delete Term`,
                                     children: (
                                         <Text>
@@ -215,7 +271,7 @@ const TermsPage = () => {
                                     onCancel: () => { },
                                     onConfirm: () => deleteTerm(term, i)
                                 })} >
-                                    <IconTrash />
+                                    <IconTrash size="1rem" />
                                 </ActionIcon>
                             </td>
                         </tr>
