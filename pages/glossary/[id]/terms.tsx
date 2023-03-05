@@ -1,14 +1,13 @@
 import { ActionIcon, Anchor, Button, Group, Loader, Table, Title, Text, Flex, Autocomplete } from "@mantine/core"
 import { closeAllModals, openConfirmModal, openModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
-import { IconDeviceFloppy, IconFile, IconPlus, IconSearch, IconTrash, IconUpload } from "@tabler/icons-react";
+import { IconPlus, IconSearch, IconTrash, IconUpload } from "@tabler/icons-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import FieldModal from "../../../components/glossaries/terms/FieldModal";
 import TermForm from "../../../components/glossaries/terms/TermForm";
 import UploadCsvModal from "../../../components/glossaries/terms/UploadCsvModal";
-import { deleteFieldForAllTermsInGlossary } from "../../../data/database";
 import { IGlossary } from "../../../data/Glossary";
 import { ITerm } from "../../../data/Term";
 
@@ -36,7 +35,13 @@ const TermsPage = () => {
         setFields(tempFields);
     }, [terms,]);
 
-    const getGlossary = async (id: string) => {
+     useEffect(() => {
+        if (!id) return;
+        setIsLoading(true);
+        getGlossary(id as string);
+    }, [id]);
+
+    async function getGlossary(id: string) {
         fetch(`/api/glossary/${id}`).then((res) =>
             res.json()
         ).then((data) => {
@@ -45,14 +50,8 @@ const TermsPage = () => {
             setTerms(data.terms);
         });
     }
-
-    useEffect(() => {
-        if (!id) return;
-        setIsLoading(true);
-        getGlossary(id as string);
-    }, [id]);
-
-    const addField = (field: string) => {
+   
+    function addField(field: string) {
         setFields((curr) => [...curr, field]);
         closeAllModals();
     }
@@ -78,7 +77,7 @@ const TermsPage = () => {
 
     if (isLoading) return <Loader />
 
-    const saveTerms = () => {
+    function saveTerms() {
         if (!glossary) return;
         fetch(`/api/glossary/${glossary!._id}/terms`, {
             method: "PUT",
@@ -160,7 +159,7 @@ const TermsPage = () => {
         });
     }
 
-    const deleteField = (fieldName: string) => {
+    function deleteField(fieldName: string) {
         fetch(`/api/glossary/${id}/terms`, {
             method: "DELETE",
             body: JSON.stringify({ fieldName })
