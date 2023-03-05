@@ -10,7 +10,10 @@ export const getCommentFormat = (glossary: IGlossary) => {
 **${term.term}:** ${term.definition}
 
 
-    ${extraFields.map((field) => `${field}: ${term[field] || ""}`)}`)]
+    ${extraFields.filter((field) => term[field]).map((field) => `  ${field}: ${term[field]}`).join(`
+    `)}
+`
+    )]
 
     if (glossary.commentOptions?.showOwners) {
 
