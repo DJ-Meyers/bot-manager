@@ -19,8 +19,6 @@ const TermsTable = ({ glossaryId, terms }: { glossaryId: string, terms: ITerm[] 
         setFields(tempFields);
     }, [terms,]);
 
-
-
     return (
         <>
             <Flex justify="space-between" align="center" mt={16}>

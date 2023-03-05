@@ -1,6 +1,5 @@
 import { Button, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { useState } from "react";
 
 const FieldModal = ({ clickHandler, fields }: { clickHandler: (val:string) => void, fields: string[] }) => {
     const form = useForm<{ field: string }>({

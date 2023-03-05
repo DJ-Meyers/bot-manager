@@ -2,7 +2,7 @@ import { Button, Code, FileButton, Flex, List, Text } from "@mantine/core";
 import { IconUpload } from "@tabler/icons-react";
 import { useState } from "react";
 
-export default function UploadCsvModal({ onClickHandler }: { onClickHandler: (file: File) => void }) {
+const UploadCsvModal = ({ onClickHandler }: { onClickHandler: (file: File) => void }) => {
     const [file, setFile] = useState<File | null>(null);
     return (
         <>
@@ -26,3 +26,5 @@ export default function UploadCsvModal({ onClickHandler }: { onClickHandler: (fi
         </>
     );
 }
+
+export default UploadCsvModal;

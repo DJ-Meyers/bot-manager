@@ -1,8 +1,6 @@
-import { Box, Button, Divider, Flex, Group, List, MultiSelect, Table, TextInput, Title } from "@mantine/core"
-import { useForm } from "@mantine/form";
+import { Box, Button, Divider, Flex, Group, MultiSelect, TextInput, Title } from "@mantine/core"
 import { IconPencil } from "@tabler/icons-react";
 import { Session } from "next-auth";
-import { useEffect, useState } from "react"
 import { IGlossary } from "../../data/Glossary"
 import TermsTable from "./terms/TermsTable";
 

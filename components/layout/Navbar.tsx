@@ -1,23 +1,15 @@
-import { ActionIcon, Anchor, Button, Container, Flex, MantineTheme, ThemeIcon, useMantineTheme } from "@mantine/core";
+import { ActionIcon, Anchor, Button, Container, Flex, Header } from "@mantine/core";
 import { signIn, signOut, useSession } from "next-auth/react"
 import { IconHome, IconLogout, IconBrandReddit } from "@tabler/icons-react";
-import styled from "@emotion/styled";
-
-const StyledNav = styled.nav`
-    padding: 8px 0;
-    margin-bottom: 16px;
-    background-color: ${({ theme }: { theme: MantineTheme }) => theme.colorScheme === "dark" ? theme.colors.dark[8] : theme.colors.gray[1]}
-`
 
 export const Navbar = () => {
     const { data: session, status } = useSession();
-    const theme = useMantineTheme();
 
     return (
-        <StyledNav theme={theme}>
+        <Header height={{ base: 48, md: 64}} bg="dark" p="md">
             <Container>
                 <Flex justify="space-between" align="center">
-                    <Flex gap="lg" align="flex-end">
+                    <Flex gap={16} align="flex-end">
                         <Anchor href="/">
                             <ActionIcon variant="transparent">
                                 <IconHome size={20} />
@@ -53,6 +45,6 @@ export const Navbar = () => {
                     }
                 </Flex>
             </Container>
-        </StyledNav>
+        </Header>
     )
 }

@@ -2,9 +2,8 @@ import { Button, Drawer, Group, Textarea, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { openModal } from "@mantine/modals";
 import { ModalSettings } from "@mantine/modals/lib/context";
-import { SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ITerm } from "../../../data/Term";
-import FieldModal from "./FieldModal";
 
 interface TermFormProps {
     isOpen: boolean,

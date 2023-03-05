@@ -1,10 +1,9 @@
-import { Box, Button, Flex, Group, List, MultiSelect, Table, TextInput, Title } from "@mantine/core"
+import { Box, Flex, List, Title } from "@mantine/core"
 import { useForm } from "@mantine/form";
 import { Session } from "next-auth";
 import { useEffect, useState } from "react"
 import { IGlossary } from "../../data/Glossary"
 import GlossarySummary from "./GlossarySummary";
-import TermsTable from "./terms/TermsTable";
 
 type GlossaryManagerProps = {
     glossaries: IGlossary[],

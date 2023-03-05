@@ -1,5 +1,4 @@
-import { ActionIcon, Anchor, Breadcrumbs, Text } from "@mantine/core";
-import { IconHome } from "@tabler/icons-react";
+import { Anchor, Breadcrumbs, Text } from "@mantine/core";
 import { useRouter } from "next/router";
 
 interface CrumbProps {
