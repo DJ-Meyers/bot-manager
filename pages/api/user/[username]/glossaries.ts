@@ -1,24 +1,18 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { closeConnection, getGlossaryCollection } from "../../../../data/database";
+import { getGlossaryiesForUser } from "../../../../data/database";
 
 
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-    const { username } = req.query;
-    const { client, collection } = await getGlossaryCollection();
-
-    let data = await collection.find({ owners: username }).toArray();
-
-    closeConnection(client);
-    if (!data) {
-        const res = await collection.insertOne({
-            name: `${username}'s Glossary`,
-            terms: [],
-            owners: [username],
-            subreddits: [],
-        });
-        data = await collection.find({ owners: username }).toArray();
+    const { usernameParam } = req.query;
+    const username = Array.isArray(usernameParam) ? usernameParam[0] : usernameParam;
+    
+    if (!username) {
+        res.status(400).json({ message: `Username ${username} is not valid` });
+        return;
     }
+    
+    const data = await getGlossaryiesForUser(username);
     res.status(200).json(data);
 }
 
