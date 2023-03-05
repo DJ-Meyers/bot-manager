@@ -1,12 +1,13 @@
 import { ActionIcon, Anchor, Button, Group, Loader, Table, Title, Text, Flex, Autocomplete } from "@mantine/core"
 import { closeAllModals, openConfirmModal, openModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
-import { IconDeviceFloppy, IconPlus, IconSearch, IconTrash } from "@tabler/icons-react";
+import { IconDeviceFloppy, IconFile, IconPlus, IconSearch, IconTrash, IconUpload } from "@tabler/icons-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import FieldModal from "../../../components/glossaries/terms/FieldModal";
 import TermForm from "../../../components/glossaries/terms/TermForm";
+import UploadCsvModal from "../../../components/glossaries/terms/UploadCsvModal";
 import { deleteFieldForAllTermsInGlossary } from "../../../data/database";
 import { IGlossary } from "../../../data/Glossary";
 import { ITerm } from "../../../data/Term";
@@ -56,9 +57,19 @@ const TermsPage = () => {
         closeAllModals();
     }
 
-    const modalArgs = {
+    const addFieldModalArgs = {
         title: "Add Field",
         children: <FieldModal fields={fields} clickHandler={addField} />
+    }
+
+    async function uploadCsv(file: File) {
+        console.log(file);
+        closeAllModals();
+    }
+
+    const uploadCsvModalArgs = {
+        title: "Upload CSV",
+        children: <UploadCsvModal onClickHandler={uploadCsv} />
     }
 
     if (!isLoading && status === "authenticated" && session?.user?.name && glossary && glossary.owners && !glossary.owners.includes(session.user.name)) {
@@ -92,8 +103,8 @@ const TermsPage = () => {
                 color: "red"
             })
         });
-    }
-
+        }
+    
     const addTerm = (term: ITerm) => {
         if (!glossary) return;
         fetch(`/api/glossary/${glossary!._id}/terms`, {
@@ -187,7 +198,7 @@ const TermsPage = () => {
     return (
         <>
             <Title order={2}>Modify Terms for {glossary.name}</Title>
-            <TermForm isOpen={isOpen} setIsOpen={setIsOpen} fields={fields} modalArgs={modalArgs} onSubmit={addTerm} />
+            <TermForm isOpen={isOpen} setIsOpen={setIsOpen} fields={fields} modalArgs={addFieldModalArgs} onSubmit={addTerm} />
             <Flex justify="space-between" align="center" mt={16} gap={16}>
                 <Autocomplete
                     icon={<IconSearch />}
@@ -198,20 +209,22 @@ const TermsPage = () => {
                 />
                 <Group position="right" spacing={16}>
                     <Button
-                        variant="default"
-                        size="xs"
-                        leftIcon={<IconDeviceFloppy />}
-                        onClick={saveTerms}
-                    >
-                        Save
-                    </Button>
-                    <Button
-                        variant="default"
+                        variant="gradient"
+                        gradient={{ from: "indigo", to: "cyan" }}
                         size="xs"
                         leftIcon={<IconPlus />}
                         onClick={() => setIsOpen(true)}
                     >
                         Term
+                    </Button>
+                    <Button
+                        variant="gradient"
+                        gradient={{ from: "teal", to: "green" }}
+                        size="xs"
+                        leftIcon={<IconUpload />}
+                        onClick={() => openModal(uploadCsvModalArgs)}
+                    >
+                        Upload CSV
                     </Button>
                 </Group>
             </Flex>
