@@ -122,7 +122,6 @@ const TermsPage = () => {
     }
 
     const deleteTerm = (term: ITerm, index: number) => {
-        console.log("Attemtping delete", term, index);
         fetch(`/api/glossary/${id}/terms/${index}`, {
             method: "DELETE",
             body: JSON.stringify(term)

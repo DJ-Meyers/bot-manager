@@ -1,6 +1,7 @@
 import { Button, Group, Loader, Textarea, TextInput, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { closeAllModals, openModal } from "@mantine/modals";
+import { showNotification } from "@mantine/notifications";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import FieldModal from "../../../../components/glossaries/terms/FieldModal";
@@ -45,6 +46,31 @@ const TermPage = () => {
         }
     });
 
+    async function updateTerm(term: ITerm) {
+        fetch(`/api/glossary/${glossary!._id}/terms/${index}`, {
+            method: "PUT",
+            body: JSON.stringify(term)
+        }).then(async (res) => {
+            if (res.status !== 200) {
+                const { message } = await res.json();
+                throw new Error(message);
+            }
+            return res.json()
+        }).then((data) => {
+            showNotification({
+                title: "Success",
+                message: "Updated Term",
+                color: "green"
+            })
+        }).catch((err) => {
+            showNotification({
+                title: "There was an issue saving the term",
+                message: `${err}`,
+                color: "red"
+            })
+        });
+    }
+
     if (isLoading || !term || !glossary) return <Loader />
 
     const extraFields = getExtraFields(glossary);
@@ -61,7 +87,7 @@ const TermPage = () => {
     return (
         <>
             <Title order={2}>Modify Term {index}</Title>
-            <form onSubmit={form.onSubmit((values) => console.log(values))}>
+            <form onSubmit={form.onSubmit((values) => updateTerm(values))}>
                 {fields.map((field) => field === "definition" ? (
                     <Textarea mb={8}
                         key={field}
