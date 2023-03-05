@@ -20,7 +20,7 @@ const AutoBreadcrumbs = () => {
 
     if (router.asPath === "/") return <></>
 
-    const generateBreadcrumbs = () => {
+    function generateBreadcrumbs() {
 
         const asPathWithoutQuery = router.asPath.split("?")[0];
         const asPathNestedRoutes = asPathWithoutQuery.split("/").filter(v => v.length > 0);
