@@ -13,8 +13,6 @@ type GlossaryManagerProps = {
 
 const GlossaryManager = ({ glossaries, session }: GlossaryManagerProps) => {
     const [selectedGlossary, setSelectedGlossary] = useState<IGlossary>();
-    const [ownersList, setOwnersList] = useState<string[]>([]);
-    const [subredditsList, setSubredditsList] = useState<string[]>([]);
 
     const form = useForm<IGlossary>({
         initialValues: {
@@ -26,10 +24,14 @@ const GlossaryManager = ({ glossaries, session }: GlossaryManagerProps) => {
     });
 
     useEffect(() => {
+        if (!selectedGlossary) {
+            setSelectedGlossary(glossaries[0]);
+        }
+    }, [glossaries]);
+
+    useEffect(() => {
         if (selectedGlossary) {
             form.setValues(selectedGlossary);
-            setOwnersList(selectedGlossary.owners);
-            setSubredditsList(selectedGlossary.subreddits);
         } else {
             form.setValues({
                 owners: [],
@@ -37,8 +39,6 @@ const GlossaryManager = ({ glossaries, session }: GlossaryManagerProps) => {
                 subreddits: [],
                 terms: []
             });
-            setOwnersList([]);
-            setSubredditsList([]);
         }
     }, [selectedGlossary,]);
     

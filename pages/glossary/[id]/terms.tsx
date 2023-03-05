@@ -51,7 +51,6 @@ const TermsPage = () => {
         getGlossary(id as string);
     }, [id]);
 
-
     const addField = (field: string) => {
         setFields((curr) => [...curr, field]);
         closeAllModals();
@@ -210,9 +209,9 @@ const TermsPage = () => {
                         variant="default"
                         size="xs"
                         leftIcon={<IconPlus />}
-                        onClick={() => openModal(modalArgs)}
+                        onClick={() => setIsOpen(true)}
                     >
-                        Field
+                        Term
                     </Button>
                 </Group>
             </Flex>

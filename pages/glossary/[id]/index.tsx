@@ -111,6 +111,7 @@ const GlossaryPage = () => {
                 <MultiSelect
                     label="Owners"
                     data={glossary.owners}
+                    description="Do not include '/u/' in owner names"
                     placeholder="Add Owners"
                     searchable
                     clearable
@@ -126,6 +127,7 @@ const GlossaryPage = () => {
                     label="Subreddits"
                     data={glossary.subreddits}
                     placeholder="Add Subreddits"
+                    description="Do not include '/r/' in subreddit names"
                     searchable
                     clearable
                     creatable
