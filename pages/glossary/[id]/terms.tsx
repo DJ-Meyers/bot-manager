@@ -1,4 +1,4 @@
-import { ActionIcon, Anchor, Button, Group, Loader, Table, Title, Text, Flex, Autocomplete } from "@mantine/core"
+import { ActionIcon, Anchor, Button, Group, Loader, Table, Title, Text, Flex, Autocomplete, TextInput } from "@mantine/core"
 import { closeAllModals, openConfirmModal, openModal } from "@mantine/modals";
 import { showNotification } from "@mantine/notifications";
 import { IconPlus, IconSearch, IconTrash, IconUpload } from "@tabler/icons-react";
@@ -10,6 +10,7 @@ import TermForm from "../../../components/glossaries/terms/TermForm";
 import UploadCsvModal from "../../../components/glossaries/terms/UploadCsvModal";
 import { IGlossary } from "../../../data/Glossary";
 import { ITerm } from "../../../data/Term";
+import Papa from "papaparse";
 
 const TermsPage = () => {    
     const router = useRouter();
@@ -18,6 +19,7 @@ const TermsPage = () => {
     const [glossary, setGlossary] = useState<IGlossary>();
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isOpen, setIsOpen] = useState(false);
+    const [isUpdatingFromCsv, setIsUpdatingFromCsv] = useState<boolean>(false);
     const [fields, setFields] = useState<string[]>(["term", "definition"]);
     const [terms, setTerms] = useState<ITerm[]>([]);
     const [searchValue, setSearchValue] = useState<string>();
@@ -33,6 +35,10 @@ const TermsPage = () => {
             });
         });
         setFields(tempFields);
+        if (isUpdatingFromCsv) {
+            saveTerms();
+            setIsUpdatingFromCsv(false);
+        }
     }, [terms,]);
 
      useEffect(() => {
@@ -62,13 +68,37 @@ const TermsPage = () => {
     }
 
     async function uploadCsv(file: File) {
-        console.log(file);
+        if (!file) return;
+        const reader = new FileReader();
+
+        reader.onload = async ({ target }: any) => {
+            setIsUpdatingFromCsv(true);
+            const csv = Papa.parse(target.result, { header: true, quoteChar: `"` });
+            const parsedData = csv?.data as ITerm[];
+            const failedImports: ITerm[] = [], successfulImports: ITerm[] = [];
+            parsedData.forEach((newTerm) => {
+                if (terms.map((oldTerm) => oldTerm.term).includes(newTerm.term)) {
+                    failedImports.push(newTerm);
+                } else {
+                    successfulImports.push(newTerm);
+                }
+            });
+            if (successfulImports.length) setTerms((curr) => [...curr, ...successfulImports]);
+            showNotification({
+                title: "Uploading Terms",
+                message: `${successfulImports.length} new terms being uploaded.  ${failedImports.length} duplicate terms were ignored`,
+                color: "grape",
+            });
+            setIsUpdatingFromCsv(false);
+        }
+
+        reader.readAsText(file);
         closeAllModals();
     }
 
     const uploadCsvModalArgs = {
         title: "Upload CSV",
-        children: <UploadCsvModal onClickHandler={uploadCsv} />
+        children: <UploadCsvModal onClickHandler={(file: File) => { uploadCsv(file).then(() => saveTerms()) }} />
     }
 
     if (!isLoading && status === "authenticated" && session?.user?.name && glossary && glossary.owners && !glossary.owners.includes(session.user.name)) {
@@ -252,7 +282,7 @@ const TermsPage = () => {
                                                 }
                                             )}
                                         >
-                                            <IconTrash />
+                                            <IconTrash size="xs" />
                                         </ActionIcon>
                                     }
                             </Flex></th>
@@ -261,7 +291,7 @@ const TermsPage = () => {
                     </tr>     
                 </thead>
                 <tbody>
-                    {terms && (searchValue ? terms.filter((t) => t.term.includes(searchValue)) : terms).map((term, i) => 
+                    {terms && terms.length > 0 && (searchValue ? terms.filter((t) => t.term.includes(searchValue)) : terms).map((term, i) => 
                         <tr key={i}>
                             {fields.map((field) => <td key={`${i}-${field}`}>{
                                 field === "term" ? <Anchor href={`/glossary/${id}/terms/${i}`} >{term[field] || ""}</Anchor> : term[field] || ""
