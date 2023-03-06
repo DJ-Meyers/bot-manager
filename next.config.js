@@ -1,8 +1,6 @@
 module.exports = {
-  nextConfig: {
-    reactStrictMode: true,
-    swcMinify: true,
-  },
+  reactStrictMode: true,
+  swcMinify: true,
   async redirects() {
     return [
       {
