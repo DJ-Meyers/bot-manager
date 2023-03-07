@@ -7,11 +7,14 @@ export function getCommentFormat(glossary: IGlossary) {
     const extraFields = getExtraFields(glossary);
     const output = [...terms.map((term) =>
 `
-**${term.term}:** ${term.definition}
+**${term.term}**
 
+\`\`\`
+  ${term.definition}
 
-    ${extraFields.filter((field) => term[field]).map((field) => `  ${field}: ${term[field]}`).join(`
-    `)}
+  ${extraFields.filter((field) => term[field]).map((field) => `${field}: ${term[field]}`).join(`
+  `)}
+\`\`\`
 `
     )]
 

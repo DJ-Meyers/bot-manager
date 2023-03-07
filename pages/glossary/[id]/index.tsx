@@ -140,7 +140,7 @@ const GlossaryPage = () => {
                 />
                 <Flex mt={16} gap={16}>
                     <Box sx={(theme) => ({
-                        flexBasis: "50%"
+                        flex: "0 0 30%"
                     })}>
                         <Label>Comment Options</Label>
                         <Checkbox mt={16} label="Show Owners" {...form.getInputProps("commentOptions.showOwners", {type: "checkbox"})} />
@@ -148,13 +148,15 @@ const GlossaryPage = () => {
                         <Checkbox mt={16} label="Recursive Definitions" {...form.getInputProps("commentOptions.recursiveDefinitions", {type: "checkbox"})} />
                         <TextInput mt={16} label="Additional Message" {...form.getInputProps("commentOptions.additionalMessage")} />
                     </Box>
-                    <div style={{ flexBasis: "50%", height: "100%" }}>
+                    <div style={{ flex: "0 0 70%", maxWidth: "70%" }}>
                         <Label>Preview</Label>
                         <Box sx={(theme) => ({
                             borderRadius: theme.radius.md,
                             backgroundColor: theme.colors.gray[9],
                             padding: 8,
-                            marginTop: 16
+                            marginTop: 16,
+                            overflow: "auto",
+                            maxWidth: "100%"
                         })}>
                             <ReactMarkdown>
                                 {commentPreview}
