@@ -25,7 +25,7 @@ const TermsPage = () => {
     const [searchValue, setSearchValue] = useState<string>();
 
     useEffect(() => {
-        if (!terms) return;
+        if (!terms || !terms.length) return;
         const tempFields: string[] = ["term", "definition"];
         terms.forEach((t) => {
             Object.keys(t).forEach((field) => {
@@ -89,7 +89,6 @@ const TermsPage = () => {
                 message: `${successfulImports.length} new terms being uploaded.  ${failedImports.length} duplicate terms were ignored`,
                 color: "grape",
             });
-            setIsUpdatingFromCsv(false);
         }
 
         reader.readAsText(file);
