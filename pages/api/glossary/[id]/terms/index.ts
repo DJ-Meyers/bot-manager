@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth";
-import { deleteFieldForAllTermsInGlossary, GlossaryApiResponse, handleUpdateResults, insertTermForGlossary, updateTermsForGlossary } from "../../../../../data/database";
+import { deleteAllTermsInGlossary, deleteFieldForAllTermsInGlossary, GlossaryApiResponse, handleUpdateResults, insertTermForGlossary, updateTermsForGlossary } from "../../../../../data/database";
 import { authOptions } from "../../../auth/[...nextauth]";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse<GlossaryApiResponse>) => {
@@ -38,14 +38,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<GlossaryApiResp
             }
         )
     } else if (req.method === "DELETE") {
-        const { fieldName } = JSON.parse(req.body);
-        const updateResult = await deleteFieldForAllTermsInGlossary(id as string, username, fieldName);
+        const updateResult = await deleteAllTermsInGlossary(id as string, username);
         return await handleUpdateResults(
             res,
             updateResult,
             {
-                200: { message: `Successfully removed field ${fieldName} from terms in glossary ${id}` },
-                409: { message: "Request rejected because no fields were changed." },
+                200: { message: `Successfully removed all terms in glossary ${id}` },
+                409: { message: "No Terms to delete" },
                 404: { message: `Could not find glossary owned by ${username} with id: ${id}.` }
             }
         )

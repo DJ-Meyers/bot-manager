@@ -32,6 +32,21 @@ export async function deleteTermByName(id: string, username: string, name: strin
     return updateResult;
 }
 
+export async function deleteAllTermsInGlossary(id: string, username: string): Promise<UpdateResult> {
+    const { collection, client } = await getGlossaryCollection();
+
+    const updateResult = await collection.updateOne({
+        _id: new ObjectId(id), owners: username
+    }, {
+        $unset: {
+            terms: []
+        }
+    });
+    client.close();
+
+    return updateResult;
+}
+
 export async function deleteFieldForAllTermsInGlossary(id: string, username: string, fieldName: string): Promise<UpdateResult> {
     const { collection, client } = await getGlossaryCollection();
     const nestedFieldName = ["terms", "$[]", fieldName].join(".");

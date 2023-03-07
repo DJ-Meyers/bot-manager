@@ -77,13 +77,14 @@ const TermsPage = () => {
             const parsedData = csv?.data as ITerm[];
             const failedImports: ITerm[] = [], successfulImports: ITerm[] = [];
             parsedData.forEach((newTerm) => {
-                if (terms.map((oldTerm) => oldTerm.term).includes(newTerm.term)) {
+                if (terms && terms.length && terms.map((oldTerm) => oldTerm.term).includes(newTerm.term)) {
                     failedImports.push(newTerm);
                 } else {
                     successfulImports.push(newTerm);
                 }
             });
-            if (successfulImports.length) setTerms((curr) => [...curr, ...successfulImports]);
+            if (terms && terms.length && successfulImports.length) setTerms((curr) => [...curr, ...successfulImports]);
+            else if (successfulImports.length) setTerms([...successfulImports]);
             showNotification({
                 title: "Uploading Terms",
                 message: `${successfulImports.length} new terms being uploaded.  ${failedImports.length} duplicate terms were ignored`,
@@ -95,16 +96,31 @@ const TermsPage = () => {
         closeAllModals();
     }
 
-    const uploadCsvModalArgs = {
-        title: "Upload CSV",
-        children: <UploadCsvModal onClickHandler={(file: File) => { uploadCsv(file).then(() => saveTerms()) }} />
+    async function deleteAllTerms() {
+        fetch(`/api/glossary/${glossary!._id}/terms`, {
+            method: "DELETE",
+            body: JSON.stringify(terms)
+        }).then(async (res) => {
+            if (res.status !== 200) {
+                const { message } = await res.json();
+                throw new Error(message);
+            }
+            return res.json()
+        }).then((data) => {
+            setTerms(data);
+            showNotification({
+                title: "Success",
+                message: "Updated Terms",
+                color: "green"
+            })
+        }).catch((err) => {
+            showNotification({
+                title: "There was an issue saving the terms",
+                message: `${err}`,
+                color: "red"
+            })
+        });
     }
-
-    if (!isLoading && status === "authenticated" && session?.user?.name && glossary && glossary.owners && !glossary.owners.includes(session.user.name)) {
-        return <>You are not an owner of this Glossary</>
-    }
-
-    if (isLoading) return <Loader />
 
     function saveTerms() {
         if (!glossary) return;
@@ -131,7 +147,7 @@ const TermsPage = () => {
                 color: "red"
             })
         });
-        }
+    }
     
     function addTerm(term: ITerm) {
         if (!glossary) return;
@@ -189,9 +205,8 @@ const TermsPage = () => {
     }
 
     function deleteField(fieldName: string) {
-        fetch(`/api/glossary/${id}/terms`, {
+        fetch(`/api/glossary/${id}/terms/field/${fieldName}`, {
             method: "DELETE",
-            body: JSON.stringify({ fieldName })
         }).then(async (res) => {
             if (res.status !== 200) {
                 const { message } = await res.json();
@@ -215,6 +230,17 @@ const TermsPage = () => {
         });
     }
 
+    const uploadCsvModalArgs = {
+        title: "Upload CSV",
+        children: <UploadCsvModal onClickHandler={(file: File) => { uploadCsv(file).then(() => saveTerms()) }} />
+    }
+
+    if (!isLoading && status === "authenticated" && session?.user?.name && glossary && glossary.owners && !glossary.owners.includes(session.user.name)) {
+        return <>You are not an owner of this Glossary</>
+    }
+
+    if (isLoading) return <Loader />
+
     if (!glossary) {
         return (
             <>
@@ -230,7 +256,7 @@ const TermsPage = () => {
             <Flex justify="space-between" align="center" mt={16} gap={16}>
                 <Autocomplete
                     icon={<IconSearch />}
-                    data={glossary.terms.map((t) => t.term)}
+                    data={glossary.terms?.map((t) => t.term) || []}
                     value={searchValue}
                     onChange={setSearchValue}
                     style={{ flexGrow: 1 }}
@@ -254,6 +280,23 @@ const TermsPage = () => {
                     >
                         Upload CSV
                     </Button>
+                    <Button
+                        variant="gradient"
+                        gradient={{ from: "red", to: "orange" }}
+                        size="xs"
+                        leftIcon={<IconTrash />}
+                        onClick={() =>
+                            openConfirmModal({
+                                title: <Title order={3} color="red">DANGER: This action cannnot be undone</Title>,
+                                children: (<Text>Are you sure you want to delete all Terms in this Glossary?</Text>),
+                                labels: { confirm: "Confirm", cancel: "Cancel" },
+                                onCancel: () => { },
+                                onConfirm: () => deleteAllTerms()
+                            })
+                        }
+                    >
+                        Clear Terms
+                    </Button>
                 </Group>
             </Flex>
             <Table mt={16}>
@@ -262,35 +305,35 @@ const TermsPage = () => {
                         {fields.map((field) =>
                             <th key={field}><Flex align="center" gap={8}>
                                 {field} {
-                                    !["term", "definition"].includes(field) && 
-                                        <ActionIcon
-                                            color="red"
-                                            variant="filled"
-                                            size="xs"
-                                            style={{ display: "inline" }}
-                                            onClick={() => openConfirmModal({
-                                                title: <Title order={3} color="red">DANGER: This action cannnot be undone</Title>,
-                                                children: (
-                                                    <Text>
-                                                            Are you sure you want to delete field &quot;{field}&quot; from all Terms in this Glossary?
-                                                        </Text>
-                                                    ),
-                                                    labels: { confirm: "Confirm", cancel: "Cancel" },
-                                                    onCancel: () => { },
-                                                    onConfirm: () => deleteField(field)
-                                                }
-                                            )}
-                                        >
-                                            <IconTrash size="xs" />
-                                        </ActionIcon>
-                                    }
+                                    !["term", "definition"].includes(field) &&
+                                    <ActionIcon
+                                        color="red"
+                                        variant="filled"
+                                        size="xs"
+                                        style={{ display: "inline" }}
+                                        onClick={() => openConfirmModal({
+                                            title: <Title order={3} color="red">DANGER: This action cannnot be undone</Title>,
+                                            children: (
+                                                <Text>
+                                                    Are you sure you want to delete field &quot;{field}&quot; from all Terms in this Glossary?
+                                                </Text>
+                                            ),
+                                            labels: { confirm: "Confirm", cancel: "Cancel" },
+                                            onCancel: () => { },
+                                            onConfirm: () => deleteField(field)
+                                        }
+                                        )}
+                                    >
+                                        <IconTrash size="xs" />
+                                    </ActionIcon>
+                                }
                             </Flex></th>
                         )}
                         <th>Delete Term</th>
-                    </tr>     
+                    </tr>
                 </thead>
                 <tbody>
-                    {terms && terms.length > 0 && (searchValue ? terms.filter((t) => t.term.includes(searchValue)) : terms).map((term, i) => 
+                    {terms && terms.length > 0 && (searchValue ? terms.filter((t) => t.term.includes(searchValue)) : terms).map((term, i) =>
                         <tr key={i}>
                             {fields.map((field) => <td key={`${i}-${field}`}>{
                                 field === "term" ? <Anchor href={`/glossary/${id}/terms/${i}`} >{term[field] || ""}</Anchor> : term[field] || ""
@@ -301,16 +344,16 @@ const TermsPage = () => {
                                     variant="filled"
                                     size="xs"
                                     onClick={() => openConfirmModal({
-                                    title: `Delete Term`,
-                                    children: (
-                                        <Text>
-                                            Are you sure you want to delete term &quot;{term.term}&quot;
-                                        </Text>
-                                    ),
-                                    labels: { confirm: "Confirm", cancel: "Cancel" },
-                                    onCancel: () => { },
-                                    onConfirm: () => deleteTerm(term, i)
-                                })} >
+                                        title: `Delete Term`,
+                                        children: (
+                                            <Text>
+                                                Are you sure you want to delete term &quot;{term.term}&quot;
+                                            </Text>
+                                        ),
+                                        labels: { confirm: "Confirm", cancel: "Cancel" },
+                                        onCancel: () => { },
+                                        onConfirm: () => deleteTerm(term, i)
+                                    })} >
                                     <IconTrash />
                                 </ActionIcon>
                             </td>
