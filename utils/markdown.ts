@@ -3,20 +3,60 @@ import { ITerm } from "../data/Term";
 import { getExtraFields } from "../data/utils";
 
 export function getCommentFormat(glossary: IGlossary) {
-    const terms = glossary.terms.slice(0, 2);
     const extraFields = getExtraFields(glossary);
-    const output = [...terms.map((term) =>
-`
-**${term.term}**
+    let foundTerms = glossary.terms.slice(0, 2);
 
-\`\`\`
-  ${term.definition}
+    function getNestedTerms(definition: string, set: Set<ITerm>): ITerm[] {
+        const re = new RegExp(/\[\[([^\[\]]+)\]\]/g);
+        const escapedText = definition.replace(/[()]/g, '\\$&')
+        const matches = re.exec(escapedText);
+        return glossary.terms.filter((term) => matches?.includes(term.term));
+    }
 
-  ${extraFields.filter((field) => term[field]).map((field) => `${field}: ${term[field]}`).join(`
-  `)}
-\`\`\`
+    function getRecursiveDefinitions(terms: ITerm[], set: Set<ITerm>) {
+        if (!terms || !terms.filter((term) => !set.has(term)).length) return;
+
+        terms.forEach((term) => { 
+            const nestedTerms = getNestedTerms(term.definition, set);
+            nestedTerms.forEach((nt) => set.add(nt));
+            getRecursiveDefinitions(nestedTerms, set);
+        })
+            
+        return;
+    }
+
+    function getTermsString(terms: ITerm[]) {
+        return terms.map((term) => `
+### ${term.term}
+
+  ${term.definition.replaceAll("[[", "`").replaceAll("]]", "`")}
+
+  ${extraFields.filter((field) => term[field]).map((field) => `**${field}**: ${term[field]}`).join(
+`  
 `
-    )]
+        )}
+
+`
+        ).join(
+`
+
+
+`   );
+    }
+
+    const nestedTerms: ITerm[] = [];
+    if (glossary.commentOptions?.recursiveDefinitions) {
+        const termsSet = new Set<ITerm>();
+        getRecursiveDefinitions(foundTerms, termsSet);
+        nestedTerms.push(...Array.from(termsSet));
+    }
+    let output = [getTermsString(foundTerms)];
+
+    if (nestedTerms.length) {
+
+
+        output.push(getTermsString(nestedTerms));
+    }
 
     if (glossary.commentOptions?.showOwners) {
 
