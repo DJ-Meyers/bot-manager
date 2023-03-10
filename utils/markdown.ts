@@ -2,22 +2,30 @@ import { IGlossary } from "../data/Glossary";
 import { ITerm } from "../data/Term";
 import { getExtraFields } from "../data/utils";
 
-export function getCommentFormat(glossary: IGlossary) {
-    const extraFields = getExtraFields(glossary);
-    let foundTerms = glossary.terms.slice(0, 2);
+export function findBracketedWords(input: string) {
+    const regex = /\[\[([\w-]+)\]\]/g;
+    const escapedText = input.replace(/[()]/g, '\\$&');
+    const results = [...escapedText.matchAll(regex)];
+    
+    const words = results.map((match) => match[1])
+    return words;
+}
 
-    function getNestedTerms(definition: string, set: Set<ITerm>): ITerm[] {
-        const re = new RegExp(/\[\[([^\[\]]+)\]\]/g);
-        const escapedText = definition.replace(/[()]/g, '\\$&')
-        const matches = re.exec(escapedText);
-        return glossary.terms.filter((term) => matches?.includes(term.term));
+export function getCommentFormat(glossary: IGlossary, commentText: string) {
+
+    const extraFields = getExtraFields(glossary);
+    const bracketedWords = findBracketedWords(commentText);
+    let foundTerms = getTerms(bracketedWords);
+
+    function getTerms(words: string[]): ITerm[] {
+        return glossary.terms.filter((term) => words?.includes(term.term));
     }
 
     function getRecursiveDefinitions(terms: ITerm[], set: Set<ITerm>) {
         if (!terms || !terms.filter((term) => !set.has(term)).length) return;
 
         terms.forEach((term) => { 
-            const nestedTerms = getNestedTerms(term.definition, set);
+            const nestedTerms = getTerms(findBracketedWords(term.definition));
             nestedTerms.forEach((nt) => set.add(nt));
             getRecursiveDefinitions(nestedTerms, set);
         })
@@ -41,42 +49,53 @@ export function getCommentFormat(glossary: IGlossary) {
 `
 
 
-`   );
+`
+        );
     }
 
-    const nestedTerms: ITerm[] = [];
-    if (glossary.commentOptions?.recursiveDefinitions) {
-        const termsSet = new Set<ITerm>();
-        getRecursiveDefinitions(foundTerms, termsSet);
-        nestedTerms.push(...Array.from(termsSet));
-    }
-    let output = [getTermsString(foundTerms)];
-
-    if (nestedTerms.length) {
-
-
-        output.push(getTermsString(nestedTerms));
+    function getOwnerString() {
+        return glossary.owners.length > 1 ?
+            "/u/" + glossary.owners.slice(0, -1).join(", /u/") + " or /u/" + glossary.owners.slice(-1)
+            :
+            "/u/" + glossary.owners[0];
     }
 
-    if (glossary.commentOptions?.showOwners) {
 
-        const ownersStr = glossary.owners.length > 1 ?
-                "/u/" + glossary.owners.slice(0, -1).join(", /u/") + " or /u/" + glossary.owners.slice(-1)
-            : 
-                "/u/" + glossary.owners[0];
-        output.push(`Contact ${ownersStr} if you have any concerns`);
+    const output = [];
+    if (foundTerms.length) {
+        
+        output.push(getTermsString(foundTerms));
+        
+        const nestedTerms: ITerm[] = [];
+        if (glossary.commentOptions?.recursiveDefinitions) {
+            const termsSet = new Set<ITerm>();
+            getRecursiveDefinitions(foundTerms, termsSet);
+            nestedTerms.push(...Array.from(termsSet));
+            
+            if (nestedTerms.length) {
+                output.push(getTermsString(nestedTerms));
+            }
+        }
+
+        if (glossary.commentOptions?.showOwners) {
+            output.push(`Contact ${getOwnerString()} if you have any concerns`);
+        }
+
+        if (glossary.commentOptions?.additionalMessage) {
+            output.push(glossary.commentOptions.additionalMessage);
+        }
     }
 
-    if (glossary.commentOptions?.additionalMessage) {
-        output.push(glossary.commentOptions.additionalMessage);
-    }
     
-    return output.join(glossary.commentOptions?.showDividers ? `
+    
+    return output.length  ? output.join(glossary.commentOptions?.showDividers ? `
 
 ---
 
-` : `
+`
+        : `
 
 
-`);
+`
+    ) : `I couldn't find the term ${bracketedWords.map((bw) => `[[${bw}]]`).join(", ")}.  If you think this is an error, contact ${getOwnerString()}`;
 }

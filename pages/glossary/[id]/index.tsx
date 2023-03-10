@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Flex, Group, Loader, MultiSelect, TextInput, Title, Checkbox } from "@mantine/core";
+import { Box, Button, Divider, Flex, Group, Loader, MultiSelect, TextInput, Title, Checkbox, Textarea } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { showNotification } from "@mantine/notifications";
 import { useSession } from "next-auth/react";
@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import TermsTable from "../../../components/glossaries/terms/TermsTable";
 import { IGlossary } from "../../../data/Glossary";
 import ReactMarkdown from "react-markdown";
-import { getCommentFormat } from "../../../utils/markdown";
+import { findBracketedWords, getCommentFormat } from "../../../utils/markdown";
 import Label from "../../../components/text/label";
 
 const GlossaryPage = () => {
@@ -16,6 +16,7 @@ const GlossaryPage = () => {
     const { data: session, status } = useSession({ required: true });
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [glossary, setGlossary] = useState<IGlossary>();
+    const [testComment, setTestComment] = useState<string>("");
     const [commentPreview, setCommentPreview] = useState<string>("");
 
     const form = useForm<IGlossary>({
@@ -46,8 +47,12 @@ const GlossaryPage = () => {
 
     useEffect(() => {
         if (!form) return;
-        setCommentPreview(getCommentFormat(form.values));
-    }, [form.values])
+        if (!testComment && !findBracketedWords(testComment).length) {
+            setCommentPreview("Modify the Test Comment field to see a sample response from your reddit bot.  Be sure to include a [[term]] wrapped by double square brackets.");
+            return;
+        }
+        setCommentPreview(getCommentFormat(form.values, testComment));
+    }, [form, form.values, testComment])
 
     useEffect(() => {
         if (glossary) {
@@ -147,6 +152,7 @@ const GlossaryPage = () => {
                         <Checkbox mt={16} label="Show Dividers" {...form.getInputProps("commentOptions.showDividers", {type: "checkbox"})} />
                         <Checkbox mt={16} label="Recursive Definitions" {...form.getInputProps("commentOptions.recursiveDefinitions", {type: "checkbox"})} />
                         <TextInput mt={16} label="Additional Message" {...form.getInputProps("commentOptions.additionalMessage")} />
+                        <Textarea mt={16} label="Test Comment" value={testComment} onChange={(e) => setTestComment(e.target.value)} />
                     </Box>
                     <div style={{ flex: "0 0 70%", maxWidth: "70%" }}>
                         <Label>Preview</Label>
@@ -171,7 +177,7 @@ const GlossaryPage = () => {
                 </Group>
             </form>
             <Divider size="xs" />
-            <TermsTable glossaryId={glossary._id!.toString()} terms={glossary.terms} />
+            <TermsTable glossaryId={glossary._id!.toString()} terms={glossary.terms.slice(0, 100)} />
         </>
     )
 }
